@@ -1,0 +1,1635 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catálogo Digital & Panel Administrador</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Inter Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#eefdf5',
+              100: '#d9fbe8',
+              500: '#10b981',
+              600: '#059669',
+              700: '#047857',
+              whatsapp: '#25D366',
+              waDark: '#128C7E'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Scrollbar Styling */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #f1f5f9;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+    .modal-backdrop {
+      background-color: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(4px);
+    }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans antialiased min-h-screen flex flex-col selection:bg-brand-500 selection:text-white">
+
+  <!-- Header Bar / Navigation -->
+  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        
+        <!-- Brand Info con Imagen de Logo -->
+        <div class="flex items-center space-x-3 cursor-pointer" onclick="switchPublicView('catalog')">
+          <div class="w-10 h-10 rounded-xl overflow-hidden shadow-md border border-slate-200 bg-slate-900 flex items-center justify-center">
+            <img id="header-logo-img" src="" alt="Logo Tienda" class="w-full h-full object-cover">
+          </div>
+          <div>
+            <h1 class="font-bold text-slate-900 leading-tight text-base sm:text-lg flex items-center gap-2">
+              <span id="nav-store-name">Akitodo Service</span>
+            </h1>
+            <p class="text-xs text-slate-500 flex items-center gap-1">
+              <span class="inline-block w-2 h-2 rounded-full bg-brand-whatsapp animate-pulse"></span>
+              <span id="nav-slogan">Pedidos directos por WhatsApp</span>
+            </p>
+          </div>
+        </div>
+
+        <!-- Mode Navigation & Auth Control -->
+        <div class="flex items-center space-x-2">
+          <div class="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
+            <button id="btn-tab-catalog" onclick="switchTab('catalog')" class="flex items-center space-x-2 px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all shadow-sm bg-white text-slate-900">
+              <i class="fa-solid fa-store text-brand-600"></i>
+              <span>Catálogo</span>
+            </button>
+            <button id="btn-tab-admin" onclick="switchTab('admin')" class="flex items-center space-x-2 px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 transition-all">
+              <i class="fa-solid fa-user-gear text-slate-500"></i>
+              <span>Panel Admin</span>
+            </button>
+          </div>
+
+          <!-- Logout Button (Shown when logged in) -->
+          <button id="btn-logout" onclick="logoutAdmin()" class="hidden bg-rose-50 hover:bg-rose-100 text-rose-600 p-2 rounded-xl text-xs sm:text-sm font-bold border border-rose-200 transition flex items-center gap-1.5" title="Cerrar Sesión Admin">
+            <i class="fa-solid fa-right-from-bracket"></i>
+            <span class="hidden md:inline">Salir</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </header>
+
+  <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+
+    <!-- ==================== VISTA CATÁLOGO Y RECURSOS ==================== -->
+    <div id="view-catalog" class="space-y-6">
+      
+      <!-- Banner / Search Section -->
+      <div class="bg-gradient-to-r from-emerald-600 via-teal-700 to-emerald-800 rounded-3xl p-6 sm:p-8 text-white shadow-lg relative overflow-hidden">
+        <div class="absolute -right-10 -bottom-10 opacity-10 text-white text-9xl pointer-events-none">
+          <i class="fa-solid fa-cart-flatbed font-black"></i>
+        </div>
+        <div class="relative z-10 max-w-2xl">
+          <h2 class="text-2xl sm:text-4xl font-extrabold tracking-tight mb-2" id="banner-title">¡Haz tu pedido en línea!</h2>
+          <p class="text-emerald-100 text-sm sm:text-base mb-6" id="banner-sub">Explora nuestro catálogo, recursos de descarga y guías de instalación paso a paso.</p>
+          
+          <!-- Search input -->
+          <div id="search-bar-container" class="relative max-w-md">
+            <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+            <input type="text" id="catalog-search" oninput="filterCatalog()" placeholder="Buscar producto o categoría..." class="w-full pl-11 pr-4 py-3 rounded-2xl bg-white text-slate-900 placeholder-slate-400 text-sm border-0 focus:ring-4 focus:ring-emerald-300 shadow-md outline-none transition">
+          </div>
+        </div>
+      </div>
+
+      <!-- Public Navigation Tabs (Catálogo, Descargas, Guía de Instalación) -->
+      <div class="flex items-center space-x-2 border-b border-slate-200 pb-2 overflow-x-auto no-scrollbar">
+        <button id="pub-tab-products" onclick="switchPublicView('catalog')" class="px-4 py-2 font-bold text-sm bg-slate-900 text-white rounded-xl shadow-xs transition flex items-center gap-2 whitespace-nowrap">
+          <i class="fa-solid fa-boxes-stacked"></i> Productos
+        </button>
+        <button id="pub-tab-downloads" onclick="switchPublicView('downloads')" class="px-4 py-2 font-semibold text-sm bg-white text-slate-600 hover:bg-slate-200 border border-slate-200 rounded-xl transition flex items-center gap-2 whitespace-nowrap">
+          <i class="fa-solid fa-download text-brand-600"></i> Descargas
+        </button>
+        <button id="pub-tab-guides" onclick="switchPublicView('guides')" class="px-4 py-2 font-semibold text-sm bg-white text-slate-600 hover:bg-slate-200 border border-slate-200 rounded-xl transition flex items-center gap-2 whitespace-nowrap">
+          <i class="fa-solid fa-circle-play text-red-500"></i> Guía de Instalación
+        </button>
+      </div>
+
+      <!-- Sub-Filter Categories (Only visible in Products view) -->
+      <div class="flex items-center space-x-2 overflow-x-auto pb-2 no-scrollbar" id="category-pills">
+        <!-- Injected via JavaScript -->
+      </div>
+
+      <!-- PRODUCTS GRID CONTAINER -->
+      <div id="public-sec-products" class="space-y-6">
+        <div id="products-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
+          <!-- Products injected via JS -->
+        </div>
+
+        <div id="catalog-empty" class="hidden py-16 text-center bg-white rounded-3xl border border-slate-200">
+          <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center text-2xl">
+            <i class="fa-solid fa-box-open"></i>
+          </div>
+          <h3 class="text-lg font-bold text-slate-700 mb-1">No hay productos disponibles</h3>
+          <p class="text-slate-500 text-sm">Prueba buscar con otro término o seleccionar otra categoría.</p>
+        </div>
+      </div>
+
+      <!-- DOWNLOADS CONTAINER -->
+      <div id="public-sec-downloads" class="hidden space-y-4">
+        <div id="downloads-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <!-- Rendered via JS -->
+        </div>
+      </div>
+
+      <!-- INSTALLATION GUIDES CONTAINER -->
+      <div id="public-sec-guides" class="hidden space-y-6">
+        <div id="guides-list" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Rendered via JS -->
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ==================== VISTA LOGIN ADMIN ==================== -->
+    <div id="view-login" class="hidden py-12 flex justify-center items-center">
+      <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-xl w-full max-w-md">
+        
+        <div class="text-center mb-6">
+          <div class="w-14 h-14 mx-auto mb-3 rounded-2xl bg-gradient-to-tr from-brand-whatsapp to-brand-waDark text-white flex items-center justify-center text-2xl shadow-lg shadow-emerald-200">
+            <i class="fa-solid fa-lock"></i>
+          </div>
+          <h2 class="text-2xl font-extrabold text-slate-900">Acceso Administrador</h2>
+          <p class="text-xs sm:text-sm text-slate-500 mt-1">Ingresa tus credenciales para administrar el catálogo.</p>
+        </div>
+
+        <form id="form-login" onsubmit="handleLogin(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Usuario</label>
+            <div class="relative">
+              <i class="fa-solid fa-user absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+              <input type="text" id="login-user" required placeholder="Ingresa usuario" class="w-full pl-10 pr-3 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Contraseña</label>
+            <div class="relative">
+              <i class="fa-solid fa-key absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
+              <input type="password" id="login-pass" required placeholder="••••••••" class="w-full pl-10 pr-3 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none">
+            </div>
+          </div>
+
+          <div id="login-error" class="hidden p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-xs font-medium text-center">
+            <i class="fa-solid fa-triangle-exclamation mr-1"></i> Usuario o contraseña incorrectos.
+          </div>
+
+          <button type="submit" class="w-full py-3 bg-brand-whatsapp hover:bg-emerald-600 text-white font-bold rounded-xl shadow-lg shadow-emerald-200 transition flex items-center justify-center space-x-2 text-sm">
+            <i class="fa-solid fa-right-to-bracket"></i>
+            <span>Iniciar Sesión</span>
+          </button>
+        </form>
+
+      </div>
+    </div>
+
+    <!-- ==================== VISTA PANEL ADMINISTRADOR ==================== -->
+    <div id="view-admin" class="hidden space-y-6">
+      
+      <!-- Top Admin Header -->
+      <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
+            <i class="fa-solid fa-gauge-high text-brand-600"></i>
+            Panel de Control Akitodo Service
+          </h2>
+          <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Administra tu inventario, categorías, descargas, guías en video y seguridad.</p>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button onclick="openProductModal()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-xl shadow-md shadow-emerald-200 transition flex items-center gap-2">
+            <i class="fa-solid fa-plus"></i> Nuevo Producto
+          </button>
+        </div>
+      </div>
+
+      <!-- Admin Tabs Navigation -->
+      <div class="flex space-x-2 border-b border-slate-200 overflow-x-auto no-scrollbar">
+        <button id="admin-tab-products" onclick="switchAdminTab('products')" class="px-4 py-2.5 font-bold text-sm border-b-2 border-brand-600 text-brand-600 flex items-center gap-2 whitespace-nowrap">
+          <i class="fa-solid fa-box"></i> Productos
+        </button>
+        <button id="admin-tab-categories" onclick="switchAdminTab('categories')" class="px-4 py-2.5 font-semibold text-sm text-slate-500 border-b-2 border-transparent hover:text-slate-800 flex items-center gap-2 whitespace-nowrap">
+          <i class="fa-solid fa-tags"></i> Categorías
+        </button>
+        <button id="admin-tab-downloads" onclick="switchAdminTab('downloads')" class="px-4 py-2.5 font-semibold text-sm text-slate-500 border-b-2 border-transparent hover:text-slate-800 flex items-center gap-2 whitespace-nowrap">
+          <i class="fa-solid fa-download"></i> Descargas & Guías
+        </button>
+        <button id="admin-tab-payments" onclick="switchAdminTab('payments')" class="px-4 py-2.5 font-semibold text-sm text-slate-500 border-b-2 border-transparent hover:text-slate-800 flex items-center gap-2 whitespace-nowrap">
+          <i class="fa-solid fa-qrcode"></i> Métodos de Pago & QRs
+        </button>
+        <button id="admin-tab-config" onclick="switchAdminTab('config')" class="px-4 py-2.5 font-semibold text-sm text-slate-500 border-b-2 border-transparent hover:text-slate-800 flex items-center gap-2 whitespace-nowrap">
+          <i class="fa-solid fa-sliders"></i> Configuración Tienda
+        </button>
+        <button id="admin-tab-security" onclick="switchAdminTab('security')" class="px-4 py-2.5 font-semibold text-sm text-slate-500 border-b-2 border-transparent hover:text-slate-800 flex items-center gap-2 whitespace-nowrap">
+          <i class="fa-solid fa-shield-halved"></i> Seguridad & Credenciales
+        </button>
+      </div>
+
+      <!-- SECTION 1: PRODUCTOS -->
+      <div id="admin-sec-products" class="space-y-4">
+        <!-- Stats Widgets -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
+            <div class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Total Productos</div>
+            <div class="text-2xl font-extrabold text-slate-900" id="stat-total-products">0</div>
+          </div>
+          <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
+            <div class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Activos / En Stock</div>
+            <div class="text-2xl font-extrabold text-emerald-600" id="stat-active-products">0</div>
+          </div>
+          <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
+            <div class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Categorías</div>
+            <div class="text-2xl font-extrabold text-slate-900" id="stat-total-categories">0</div>
+          </div>
+          <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
+            <div class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Moneda Configurada</div>
+            <div class="text-2xl font-extrabold text-slate-900" id="stat-currency">S/</div>
+          </div>
+        </div>
+
+        <!-- Products Table Container -->
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
+          <div class="p-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <h3 class="font-bold text-slate-800 text-base">Inventario General</h3>
+            <input type="text" id="admin-search" oninput="renderAdminTable()" placeholder="Buscar en la tabla..." class="px-3 py-1.5 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 outline-none w-full sm:w-64">
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm border-collapse">
+              <thead>
+                <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold text-xs uppercase tracking-wider">
+                  <th class="py-3.5 px-4">Producto</th>
+                  <th class="py-3.5 px-4">Categoría</th>
+                  <th class="py-3.5 px-4">Precio</th>
+                  <th class="py-3.5 px-4 text-center">Estado</th>
+                  <th class="py-3.5 px-4 text-right">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="admin-products-tbody" class="divide-y divide-slate-100">
+                <!-- Rendered via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 2: CATEGORÍAS -->
+      <div id="admin-sec-categories" class="hidden space-y-4">
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs max-w-xl">
+          <h3 class="font-bold text-slate-800 text-lg mb-3">Agregar Nueva Categoría</h3>
+          <form onsubmit="handleAddCategory(event)" class="flex gap-2">
+            <input type="text" id="new-cat-name" required placeholder="Nombre de categoría (ej: Bebidas, Ropa)" class="flex-grow px-3.5 py-2 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+            <button type="submit" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-sm transition">
+              <i class="fa-solid fa-plus mr-1"></i> Agregar
+            </button>
+          </form>
+        </div>
+
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-xs max-w-xl overflow-hidden">
+          <div class="p-4 border-b border-slate-100 font-bold text-slate-800 text-base">
+            Categorías Existentes
+          </div>
+          <ul id="admin-categories-list" class="divide-y divide-slate-100">
+            <!-- Rendered via JS -->
+          </ul>
+        </div>
+      </div>
+
+      <!-- SECTION 3: DESCARGAS & GUÍAS ADMIN -->
+      <div id="admin-sec-downloads" class="hidden space-y-6">
+        <!-- AGREGAR ENLACE DE DESCARGA -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs max-w-2xl space-y-4">
+          <h3 class="font-bold text-slate-800 text-lg flex items-center gap-2">
+            <i class="fa-solid fa-file-arrow-down text-emerald-600"></i> Agregar Enlace de Descarga
+          </h3>
+          <form onsubmit="handleAddDownloadResource(event)" class="space-y-3 text-sm">
+            <input type="text" id="dl-title" required placeholder="Título del archivo o programa (ej: Driver USB Pro)" class="w-full px-3.5 py-2 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500">
+            <input type="url" id="dl-url" required placeholder="URL de descarga (ej: Mega, Drive, Mediafire)" class="w-full px-3.5 py-2 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500">
+            <textarea id="dl-desc" rows="2" placeholder="Descripción opcional o requerimientos..." class="w-full px-3.5 py-2 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
+            <button type="submit" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition">
+              <i class="fa-solid fa-plus mr-1"></i> Añadir Descarga
+            </button>
+          </form>
+
+          <div class="border-t border-slate-100 pt-3">
+            <h4 class="font-bold text-slate-700 text-sm mb-2">Recursos para Descarga Actuales:</h4>
+            <ul id="admin-downloads-list" class="divide-y divide-slate-100 text-sm">
+              <!-- Rendered via JS -->
+            </ul>
+          </div>
+        </div>
+
+        <!-- AGREGAR GUÍA DE INSTALACIÓN (VIDEO) -->
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs max-w-2xl space-y-4">
+          <h3 class="font-bold text-slate-800 text-lg flex items-center gap-2">
+            <i class="fa-solid fa-video text-red-500"></i> Agregar Guía de Instalación (Video YouTube)
+          </h3>
+          <form onsubmit="handleAddGuide(event)" class="space-y-3 text-sm">
+            <input type="text" id="guide-title" required placeholder="Título del tutorial o guía" class="w-full px-3.5 py-2 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500">
+            <input type="url" id="guide-video" required placeholder="URL del Video de YouTube (ej: https://www.youtube.com/watch?v=...)" class="w-full px-3.5 py-2 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500">
+            <textarea id="guide-steps" rows="3" placeholder="Pasos o instrucciones resumidas para la instalación..." class="w-full px-3.5 py-2 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
+            <button type="submit" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition">
+              <i class="fa-solid fa-plus mr-1"></i> Añadir Guía
+            </button>
+          </form>
+
+          <div class="border-t border-slate-100 pt-3">
+            <h4 class="font-bold text-slate-700 text-sm mb-2">Guías en Video Actuales:</h4>
+            <ul id="admin-guides-list" class="divide-y divide-slate-100 text-sm">
+              <!-- Rendered via JS -->
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 4: MÉTODOS DE PAGO Y QRs -->
+      <div id="admin-sec-payments" class="hidden space-y-4">
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs max-w-3xl">
+          <h3 class="font-bold text-slate-800 text-lg mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-qrcode text-emerald-600"></i> Gestión de Cuentas y Códigos QR de Pago
+          </h3>
+          <p class="text-xs text-slate-500 mb-6">Configura tus cuentas Yape, Plin, USDT y Worldcoin (WLD). Los clientes podrán ver los datos y escanear el QR al realizar su pedido.</p>
+
+          <form onsubmit="savePaymentMethods(event)" class="space-y-6 text-sm">
+            
+            <!-- YAPE -->
+            <div class="p-4 rounded-2xl border border-slate-200 bg-slate-50 space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="font-extrabold text-purple-700 flex items-center gap-2 text-base">
+                  <i class="fa-solid fa-mobile-screen"></i> Yape
+                </span>
+                <label class="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-700">
+                  <input type="checkbox" id="pay-yape-active" class="w-4 h-4 text-emerald-600 rounded"> Activar Yape
+                </label>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <input type="text" id="pay-yape-num" placeholder="Número Yape (ej: 937 117 273)" class="px-3.5 py-2 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
+                <input type="text" id="pay-yape-name" placeholder="Titular de la cuenta" class="px-3.5 py-2 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">URL de Imagen QR Yape</label>
+                <input type="url" id="pay-yape-qr" placeholder="https://ejemplo.com/qr-yape.png" class="w-full px-3.5 py-2 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
+              </div>
+            </div>
+
+            <!-- PLIN -->
+            <div class="p-4 rounded-2xl border border-slate-200 bg-slate-50 space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="font-extrabold text-sky-600 flex items-center gap-2 text-base">
+                  <i class="fa-solid fa-mobile-screen-button"></i> Plin
+                </span>
+                <label class="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-700">
+                  <input type="checkbox" id="pay-plin-active" class="w-4 h-4 text-emerald-600 rounded"> Activar Plin
+                </label>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <input type="text" id="pay-plin-num" placeholder="Número Plin (ej: 937 117 273)" class="px-3.5 py-2 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
+                <input type="text" id="pay-plin-name" placeholder="Titular de la cuenta" class="px-3.5 py-2 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">URL de Imagen QR Plin</label>
+                <input type="url" id="pay-plin-qr" placeholder="https://ejemplo.com/qr-plin.png" class="w-full px-3.5 py-2 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
+              </div>
+            </div>
+
+            <!-- USDT / BINANCE -->
+            <div class="p-4 rounded-2xl border border-slate-200 bg-slate-50 space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="font-extrabold text-amber-600 flex items-center gap-2 text-base">
+                  <i class="fa-brands fa-bitcoin"></i> USDT / Binance Pay
+                </span>
+                <label class="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-700">
+                  <input type="checkbox" id="pay-usdt-active" class="w-4 h-4 text-emerald-600 rounded"> Activar USDT
+                </label>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <input type="text" id="pay-usdt-wallet" placeholder="Dirección de Wallet o Binance Pay ID" class="px-3.5 py-2 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
+                <input type="text" id="pay-usdt-network" placeholder="Red (ej: TRC20, BEP20, Binance Pay)" class="px-3.5 py-2 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">URL de Imagen QR USDT / Binance</label>
+                <input type="url" id="pay-usdt-qr" placeholder="https://ejemplo.com/qr-binance.png" class="w-full px-3.5 py-2 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
+              </div>
+            </div>
+
+            <!-- WORLDCOIN (WLD) -->
+            <div class="p-4 rounded-2xl border border-slate-200 bg-slate-50 space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="font-extrabold text-slate-900 flex items-center gap-2 text-base">
+                  <i class="fa-solid fa-earth-americas"></i> Worldcoin (WLD)
+                </span>
+                <label class="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-700">
+                  <input type="checkbox" id="pay-worldcoin-active" class="w-4 h-4 text-emerald-600 rounded"> Activar Worldcoin
+                </label>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <input type="text" id="pay-worldcoin-wallet" placeholder="Dirección de Wallet Worldcoin / Username" class="px-3.5 py-2 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
+                <input type="text" id="pay-worldcoin-network" placeholder="Red / App (ej: Optimism / World App)" class="px-3.5 py-2 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">URL de Imagen QR Worldcoin</label>
+                <input type="url" id="pay-worldcoin-qr" placeholder="https://ejemplo.com/qr-worldcoin.png" class="w-full px-3.5 py-2 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
+              </div>
+            </div>
+
+            <div class="pt-2">
+              <button type="submit" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md transition flex items-center gap-2">
+                <i class="fa-solid fa-floppy-disk"></i> Guardar Métodos de Pago
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- SECTION 5: CONFIGURACIÓN TIENDA -->
+      <div id="admin-sec-config" class="hidden space-y-4">
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs max-w-2xl">
+          <h3 class="font-bold text-slate-800 text-lg mb-4 flex items-center gap-2">
+            <i class="fa-solid fa-store text-emerald-600"></i> Datos Generales del Negocio
+          </h3>
+          
+          <form onsubmit="saveStoreConfig(event)" class="space-y-4 text-sm">
+            <div>
+              <label class="block font-medium text-slate-700 mb-1">Nombre de la Tienda</label>
+              <input type="text" id="cfg-name" required class="w-full px-3.5 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+            </div>
+
+            <div>
+              <label class="block font-medium text-slate-700 mb-1">Eslogan / Subtítulo</label>
+              <input type="text" id="cfg-slogan" required class="w-full px-3.5 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block font-medium text-slate-700 mb-1">WhatsApp (con código de país, sin +)</label>
+                <input type="text" id="cfg-phone" required placeholder="51937117273" class="w-full px-3.5 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+              </div>
+              <div>
+                <label class="block font-medium text-slate-700 mb-1">Símbolo de Moneda</label>
+                <input type="text" id="cfg-currency" required placeholder="S/ o $" class="w-full px-3.5 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+              </div>
+            </div>
+
+            <div>
+              <label class="block font-medium text-slate-700 mb-1">URL / Enlace de la Imagen del Logo</label>
+              <input type="url" id="cfg-logo" required placeholder="https://..." class="w-full px-3.5 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+            </div>
+
+            <div class="pt-2">
+              <button type="submit" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md transition">
+                <i class="fa-solid fa-floppy-disk mr-1"></i> Guardar Configuración
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- SECTION 6: SEGURIDAD -->
+      <div id="admin-sec-security" class="hidden space-y-4">
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs max-w-lg">
+          <h3 class="font-bold text-slate-800 text-lg mb-2 flex items-center gap-2">
+            <i class="fa-solid fa-key text-emerald-600"></i> Cambiar Credenciales de Acceso
+          </h3>
+          <p class="text-xs text-slate-500 mb-4">Actualiza el usuario y contraseña para ingresar al Panel Administrador.</p>
+
+          <form onsubmit="saveSecurityCredentials(event)" class="space-y-4 text-sm">
+            <div>
+              <label class="block font-medium text-slate-700 mb-1">Nuevo Usuario Administrador</label>
+              <input type="text" id="sec-user" required class="w-full px-3.5 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+            </div>
+
+            <div>
+              <label class="block font-medium text-slate-700 mb-1">Nueva Contraseña</label>
+              <input type="password" id="sec-pass" required minlength="6" class="w-full px-3.5 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+            </div>
+
+            <div class="pt-2">
+              <button type="submit" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md transition">
+                <i class="fa-solid fa-shield-check mr-1"></i> Actualizar Credenciales
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+
+  <!-- FLOATING CART BUTTON (Catalog Mode) -->
+  <div id="floating-cart-btn" onclick="openCartModal()" class="fixed bottom-6 right-6 bg-brand-whatsapp hover:bg-emerald-600 text-white p-3.5 sm:px-5 sm:py-3.5 rounded-full shadow-2xl cursor-pointer flex items-center space-x-3 z-40 transition-transform active:scale-95 group">
+    <div class="relative">
+      <i class="fa-solid fa-cart-shopping text-xl"></i>
+      <span id="cart-badge-count" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-extrabold w-5 h-5 rounded-full flex items-center justify-center border-2 border-white">0</span>
+    </div>
+    <span class="font-bold text-sm hidden sm:inline">Ver Pedido</span>
+    <span id="cart-badge-total" class="font-extrabold text-sm bg-black/20 px-2 py-1 rounded-md ml-1">S/ 0.00</span>
+  </div>
+
+
+  <!-- SHOPPING CART MODAL -->
+  <div id="modal-cart" class="fixed inset-0 z-50 hidden modal-backdrop flex justify-end">
+    <div class="bg-white w-full max-w-md h-full shadow-2xl flex flex-col transform transition-transform duration-300 overflow-y-auto">
+      
+      <!-- Cart Header -->
+      <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50 sticky top-0 z-10">
+        <div class="flex items-center space-x-2">
+          <i class="fa-solid fa-basket-shopping text-brand-600 text-xl"></i>
+          <h3 class="font-bold text-slate-800 text-lg">Tu Pedido</h3>
+        </div>
+        <button onclick="closeCartModal()" class="w-8 h-8 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-600 flex items-center justify-center transition">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Cart Items List -->
+      <div id="cart-items-list" class="flex-grow p-4 space-y-3">
+        <!-- Rendered via JS -->
+      </div>
+
+      <!-- Payment Method Selection -->
+      <div class="px-4 py-3 bg-slate-50 border-t border-slate-200 space-y-3">
+        <h4 class="font-bold text-slate-800 text-xs uppercase tracking-wider flex items-center gap-1.5">
+          <i class="fa-solid fa-credit-card text-emerald-600"></i> Selecciona Método de Pago
+        </h4>
+        <div id="payment-options-container" class="grid grid-cols-2 gap-2 text-xs">
+          <!-- Rendered via JS -->
+        </div>
+
+        <!-- Dynamic QR Preview Box -->
+        <div id="qr-preview-box" class="hidden p-3 bg-white border border-slate-200 rounded-2xl text-center space-y-2">
+          <p id="qr-info-title" class="font-bold text-xs text-slate-800"></p>
+          <p id="qr-info-detail" class="text-xs text-emerald-700 font-bold bg-emerald-50 py-1 px-2 rounded-lg break-all"></p>
+          <img id="qr-info-img" src="" alt="Código QR" class="w-40 h-40 mx-auto object-contain border border-slate-100 rounded-xl">
+          <p class="text-[10px] text-slate-400">Escanea el QR para realizar tu pago antes de finalizar el pedido.</p>
+        </div>
+      </div>
+
+      <!-- Cart Footer -->
+      <div class="p-4 border-t border-slate-200 bg-slate-50 space-y-3 sticky bottom-0">
+        <div class="flex justify-between items-center font-bold text-slate-800 text-lg">
+          <span>Total Estimado:</span>
+          <span id="cart-modal-total" class="text-brand-600 font-extrabold">S/ 0.00</span>
+        </div>
+
+        <button onclick="sendOrderToWhatsApp()" class="w-full bg-brand-whatsapp hover:bg-emerald-600 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg shadow-emerald-200 flex items-center justify-center space-x-2 transition text-sm">
+          <i class="fa-brands fa-whatsapp text-2xl"></i>
+          <span>Enviar Pedido a WhatsApp</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- MODAL: DETALLES DEL PRODUCTO -->
+  <div id="modal-product-detail" class="fixed inset-0 z-50 hidden modal-backdrop flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-100 flex flex-col max-h-[90vh]">
+      
+      <!-- Modal Header / Image Container -->
+      <div class="relative bg-slate-100">
+        <img id="detail-img" src="" alt="Producto" class="w-full h-64 object-cover">
+        <button onclick="closeDetailModal()" class="absolute top-3 right-3 w-9 h-9 rounded-full bg-white/80 hover:bg-white text-slate-700 backdrop-blur-sm flex items-center justify-center shadow-md transition">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+        <span id="detail-category" class="absolute bottom-3 left-3 bg-slate-900/80 backdrop-blur-sm text-white text-xs font-semibold px-3 py-1 rounded-full">
+          Categoría
+        </span>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-6 overflow-y-auto space-y-4">
+        <div>
+          <h3 id="detail-title" class="text-2xl font-extrabold text-slate-900 leading-tight">Nombre del Producto</h3>
+          <p id="detail-price" class="text-2xl font-extrabold text-emerald-600 mt-1">S/ 0.00</p>
+        </div>
+
+        <div>
+          <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Descripción</h4>
+          <p id="detail-desc" class="text-slate-600 text-sm leading-relaxed whitespace-pre-line">Descripción completa del producto.</p>
+        </div>
+
+        <!-- Quantity Selector & Add Action -->
+        <div class="pt-4 border-t border-slate-100 flex items-center gap-3">
+          <div class="flex items-center border border-slate-300 rounded-xl overflow-hidden bg-slate-50">
+            <button onclick="adjustDetailQty(-1)" class="px-3 py-2 text-slate-600 hover:bg-slate-200 transition font-bold">-</button>
+            <span id="detail-qty" class="px-4 py-2 text-sm font-bold text-slate-800">1</span>
+            <button onclick="adjustDetailQty(1)" class="px-3 py-2 text-slate-600 hover:bg-slate-200 transition font-bold">+</button>
+          </div>
+
+          <button id="detail-add-btn" onclick="addCurrentDetailToCart()" class="flex-grow py-3 px-4 bg-brand-whatsapp hover:bg-emerald-600 text-white font-bold rounded-xl shadow-lg shadow-emerald-200 transition flex items-center justify-center space-x-2 text-sm">
+            <i class="fa-solid fa-cart-plus"></i>
+            <span>Agregar al Carrito</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+
+  <!-- MODAL: CREAR / EDITAR PRODUCTO (ADMIN) -->
+  <div id="modal-product" class="fixed inset-0 z-50 hidden modal-backdrop flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-100 flex flex-col max-h-[90vh]">
+      
+      <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+        <h3 class="font-bold text-slate-800 text-base" id="product-modal-title">Agregar Producto</h3>
+        <button onclick="closeProductModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+
+      <form id="form-product" onsubmit="saveProduct(event)" class="p-5 overflow-y-auto space-y-4 text-sm">
+        <input type="hidden" id="prod-id">
+
+        <div>
+          <label class="block font-medium text-slate-700 mb-1">Nombre del Producto *</label>
+          <input type="text" id="prod-name" required placeholder="Ej: Zapatillas Deportivas" class="w-full px-3.5 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-medium text-slate-700 mb-1">Precio *</label>
+            <input type="number" step="0.01" id="prod-price" required placeholder="0.00" class="w-full px-3.5 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+          </div>
+          <div>
+            <label class="block font-medium text-slate-700 mb-1">Categoría</label>
+            <select id="prod-category" class="w-full px-3.5 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none bg-white">
+              <!-- Rendered via JS -->
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block font-medium text-slate-700 mb-1">URL de Imagen</label>
+          <input type="url" id="prod-img" placeholder="https://ejemplo.com/imagen.jpg" class="w-full px-3.5 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+        </div>
+
+        <div>
+          <label class="block font-medium text-slate-700 mb-1">Descripción</label>
+          <textarea id="prod-desc" rows="2" placeholder="Detalles o especificaciones clave..." class="w-full px-3.5 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"></textarea>
+        </div>
+
+        <div class="flex items-center space-x-2 pt-1">
+          <input type="checkbox" id="prod-active" checked class="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500">
+          <label for="prod-active" class="font-medium text-slate-700">Disponible / Activo en Catálogo</label>
+        </div>
+
+        <div class="pt-4 flex justify-end space-x-2 border-t border-slate-100">
+          <button type="button" onclick="closeProductModal()" class="px-4 py-2 border border-slate-300 text-slate-700 rounded-xl hover:bg-slate-50 transition">Cancelar</button>
+          <button type="submit" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md transition">Guardar</button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+
+  <!-- ==================== LOGICA JAVASCRIPT COMPLETA ==================== -->
+  <script>
+    // Initial Credentials
+    const INITIAL_CREDENTIALS = {
+      user: 'Akitodo',
+      pass: 'Catalogo@2027'
+    };
+
+    const LOGO_URL = 'https://drive.google.com/uc?export=view&id=1RSL1FUQhQdmvSjLktYCtTE3ZgT8DkSMD';
+
+    const INITIAL_CONFIG = {
+      name: 'Akitodo Service',
+      slogan: 'Catálogo digital',
+      phone: '51937117273',
+      currency: 'S/',
+      logo: LOGO_URL
+    };
+
+    const INITIAL_PAYMENTS = {
+      yape: { active: true, number: '51937117273', name: 'Akitodo Service', qr: '' },
+      plin: { active: true, number: '51937117273', name: 'Akitodo Service', qr: '' },
+      usdt: { active: true, wallet: 'Binance Pay ID / Wallet TRC20', network: 'TRC20 / Binance Pay', qr: '' },
+      worldcoin: { active: true, wallet: 'Dirección o Username Worldcoin', network: 'Optimism / World App', qr: '' }
+    };
+
+    const INITIAL_DOWNLOADS = [
+      { id: 'd1', title: 'Driver USB Multiuso v2.1', url: 'https://drive.google.com', desc: 'Driver indispensable para la conexión de dispositivos.' },
+      { id: 'd2', title: 'Guía Rápida en PDF', url: 'https://drive.google.com', desc: 'Manual en formato PDF para la configuración inicial.' }
+    ];
+
+    const INITIAL_GUIDES = [
+      { id: 'g1', title: 'Cómo instalar y configurar el software', video: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', steps: '1. Descarga el archivo ejecutable.\n2. Inicia como Administrador.\n3. Reinicia tu equipo para completar el proceso.' }
+    ];
+
+    const INITIAL_CATEGORIES = ['Ropa', 'Calzado', 'Accesorios', 'Electrónica'];
+
+    const INITIAL_PRODUCTS = [
+      { id: 'p1', name: 'Zapatillas Urbanas', price: 129.90, category: 'Calzado', img: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=500&q=80', desc: 'Suela amortiguada y diseño ergonómico ideal para uso diario.', active: true },
+      { id: 'p2', name: 'Hoodie Oversize Negro', price: 89.00, category: 'Ropa', img: 'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=500&q=80', desc: '100% Algodón de alta densidad, cómodo y suave.', active: true },
+      { id: 'p3', name: 'Reloj Smartwatch Pro', price: 199.50, category: 'Electrónica', img: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=500&q=80', desc: 'Monitoreo de salud, llamadas Bluetooth y batería de hasta 7 días.', active: true },
+      { id: 'p4', name: 'Mochila Impermeable', price: 75.00, category: 'Accesorios', img: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=500&q=80', desc: 'Resistente al agua, compartimento acolchado para laptops de hasta 15 pulgadas.', active: true }
+    ];
+
+    // State Variables
+    let credentials = JSON.parse(localStorage.getItem('Akitodo_credentials')) || INITIAL_CREDENTIALS;
+    let config = JSON.parse(localStorage.getItem('Akitodo_config')) || INITIAL_CONFIG;
+    let paymentMethods = JSON.parse(localStorage.getItem('Akitodo_payments')) || INITIAL_PAYMENTS;
+    let downloads = JSON.parse(localStorage.getItem('Akitodo_downloads')) || INITIAL_DOWNLOADS;
+    let guides = JSON.parse(localStorage.getItem('Akitodo_guides')) || INITIAL_GUIDES;
+    let categories = JSON.parse(localStorage.getItem('Akitodo_categories')) || INITIAL_CATEGORIES;
+    let products = JSON.parse(localStorage.getItem('Akitodo_products')) || INITIAL_PRODUCTS;
+    let cart = JSON.parse(localStorage.getItem('Akitodo_cart')) || [];
+    let isAdminLoggedIn = JSON.parse(sessionStorage.getItem('Akitodo_admin_session')) || false;
+    
+    let currentPublicSec = 'catalog';
+    let selectedCategory = 'Todas';
+    let selectedPaymentMethod = 'whatsapp';
+    let currentDetailProduct = null;
+    let currentDetailQty = 1;
+
+    // Initialization
+    window.onload = function() {
+      if(!config.logo) config.logo = LOGO_URL;
+      if(!paymentMethods.worldcoin) paymentMethods.worldcoin = INITIAL_PAYMENTS.worldcoin;
+      
+      saveAllState();
+      applyConfigUI();
+      renderCategoryPills();
+      renderCatalog();
+      renderDownloads();
+      renderGuides();
+      updateCartUI();
+    };
+
+    function saveAllState() {
+      localStorage.setItem('Akitodo_credentials', JSON.stringify(credentials));
+      localStorage.setItem('Akitodo_config', JSON.stringify(config));
+      localStorage.setItem('Akitodo_payments', JSON.stringify(paymentMethods));
+      localStorage.setItem('Akitodo_downloads', JSON.stringify(downloads));
+      localStorage.setItem('Akitodo_guides', JSON.stringify(guides));
+      localStorage.setItem('Akitodo_categories', JSON.stringify(categories));
+      localStorage.setItem('Akitodo_products', JSON.stringify(products));
+      localStorage.setItem('Akitodo_cart', JSON.stringify(cart));
+      sessionStorage.setItem('Akitodo_admin_session', JSON.stringify(isAdminLoggedIn));
+    }
+
+    // Public Section Switcher (Catálogo / Descargas / Guías)
+    function switchPublicView(sec) {
+      currentPublicSec = sec;
+      const secProd = document.getElementById('public-sec-products');
+      const secDown = document.getElementById('public-sec-downloads');
+      const secGuid = document.getElementById('public-sec-guides');
+      const catPills = document.getElementById('category-pills');
+      const searchContainer = document.getElementById('search-bar-container');
+
+      const btnProd = document.getElementById('pub-tab-products');
+      const btnDown = document.getElementById('pub-tab-downloads');
+      const btnGuid = document.getElementById('pub-tab-guides');
+
+      // Reset Active Classes
+      btnProd.className = "px-4 py-2 font-semibold text-sm bg-white text-slate-600 hover:bg-slate-200 border border-slate-200 rounded-xl transition flex items-center gap-2 whitespace-nowrap";
+      btnDown.className = "px-4 py-2 font-semibold text-sm bg-white text-slate-600 hover:bg-slate-200 border border-slate-200 rounded-xl transition flex items-center gap-2 whitespace-nowrap";
+      btnGuid.className = "px-4 py-2 font-semibold text-sm bg-white text-slate-600 hover:bg-slate-200 border border-slate-200 rounded-xl transition flex items-center gap-2 whitespace-nowrap";
+
+      if (sec === 'catalog') {
+        secProd.classList.remove('hidden');
+        secDown.classList.add('hidden');
+        secGuid.classList.add('hidden');
+        catPills.classList.remove('hidden');
+        searchContainer.classList.remove('hidden');
+        btnProd.className = "px-4 py-2 font-bold text-sm bg-slate-900 text-white rounded-xl shadow-xs transition flex items-center gap-2 whitespace-nowrap";
+      } else if (sec === 'downloads') {
+        secProd.classList.add('hidden');
+        secDown.classList.remove('hidden');
+        secGuid.classList.add('hidden');
+        catPills.classList.add('hidden');
+        searchContainer.classList.add('hidden');
+        btnDown.className = "px-4 py-2 font-bold text-sm bg-slate-900 text-white rounded-xl shadow-xs transition flex items-center gap-2 whitespace-nowrap";
+        renderDownloads();
+      } else if (sec === 'guides') {
+        secProd.classList.add('hidden');
+        secDown.classList.add('hidden');
+        secGuid.classList.remove('hidden');
+        catPills.classList.add('hidden');
+        searchContainer.classList.add('hidden');
+        btnGuid.className = "px-4 py-2 font-bold text-sm bg-slate-900 text-white rounded-xl shadow-xs transition flex items-center gap-2 whitespace-nowrap";
+        renderGuides();
+      }
+    }
+
+    // Navigation Tabs Main (Catalog / Admin)
+    function switchTab(tab) {
+      const vCatalog = document.getElementById('view-catalog');
+      const vLogin = document.getElementById('view-login');
+      const vAdmin = document.getElementById('view-admin');
+
+      const btnCatalog = document.getElementById('btn-tab-catalog');
+      const btnAdmin = document.getElementById('btn-tab-admin');
+      const btnLogout = document.getElementById('btn-logout');
+      const floatCart = document.getElementById('floating-cart-btn');
+
+      if (tab === 'catalog') {
+        vCatalog.classList.remove('hidden');
+        vLogin.classList.add('hidden');
+        vAdmin.classList.add('hidden');
+        floatCart.classList.remove('hidden');
+
+        btnCatalog.className = "flex items-center space-x-2 px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all shadow-sm bg-white text-slate-900";
+        btnAdmin.className = "flex items-center space-x-2 px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 transition-all";
+      } else {
+        floatCart.classList.add('hidden');
+        btnAdmin.className = "flex items-center space-x-2 px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all shadow-sm bg-white text-slate-900";
+        btnCatalog.className = "flex items-center space-x-2 px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 transition-all";
+
+        if (isAdminLoggedIn) {
+          vCatalog.classList.add('hidden');
+          vLogin.classList.add('hidden');
+          vAdmin.classList.remove('hidden');
+          btnLogout.classList.remove('hidden');
+          renderAdminTable();
+        } else {
+          vCatalog.classList.add('hidden');
+          vLogin.classList.remove('hidden');
+          vAdmin.classList.add('hidden');
+          btnLogout.classList.add('hidden');
+        }
+      }
+    }
+
+    // Admin Tabs Switcher
+    function switchAdminTab(sec) {
+      const sections = ['products', 'categories', 'downloads', 'payments', 'config', 'security'];
+      sections.forEach(s => {
+        const secEl = document.getElementById(`admin-sec-${s}`);
+        const tabBtn = document.getElementById(`admin-tab-${s}`);
+        if (s === sec) {
+          secEl.classList.remove('hidden');
+          tabBtn.className = "px-4 py-2.5 font-bold text-sm border-b-2 border-brand-600 text-brand-600 flex items-center gap-2 whitespace-nowrap";
+        } else {
+          secEl.classList.add('hidden');
+          tabBtn.className = "px-4 py-2.5 font-semibold text-sm text-slate-500 border-b-2 border-transparent hover:text-slate-800 flex items-center gap-2 whitespace-nowrap";
+        }
+      });
+
+      if (sec === 'categories') renderCategoriesAdminList();
+      if (sec === 'downloads') renderAdminDownloadsAndGuides();
+      if (sec === 'payments') loadPaymentMethodsAdmin();
+    }
+
+    // Login logic
+    function handleLogin(e) {
+      e.preventDefault();
+      const u = document.getElementById('login-user').value.trim();
+      const p = document.getElementById('login-pass').value.trim();
+      const errBox = document.getElementById('login-error');
+
+      if (u === credentials.user && p === credentials.pass) {
+        isAdminLoggedIn = true;
+        saveAllState();
+        errBox.classList.add('hidden');
+        document.getElementById('form-login').reset();
+        switchTab('admin');
+      } else {
+        errBox.classList.remove('hidden');
+      }
+    }
+
+    function logoutAdmin() {
+      isAdminLoggedIn = false;
+      saveAllState();
+      switchTab('catalog');
+    }
+
+    // Apply config
+    function applyConfigUI() {
+      document.getElementById('nav-store-name').innerText = config.name;
+      document.getElementById('nav-slogan').innerText = config.slogan;
+      document.getElementById('header-logo-img').src = config.logo || LOGO_URL;
+      document.getElementById('stat-currency').innerText = config.currency;
+
+      // Fill Admin config form
+      document.getElementById('cfg-name').value = config.name;
+      document.getElementById('cfg-slogan').value = config.slogan;
+      document.getElementById('cfg-phone').value = config.phone;
+      document.getElementById('cfg-currency').value = config.currency;
+      document.getElementById('cfg-logo').value = config.logo || LOGO_URL;
+
+      // Security Form
+      document.getElementById('sec-user').value = credentials.user;
+      document.getElementById('sec-pass').value = '';
+    }
+
+    // Category pills rendering
+    function renderCategoryPills() {
+      const container = document.getElementById('category-pills');
+      const allCats = ['Todas', ...categories];
+
+      container.innerHTML = allCats.map(cat => {
+        const active = cat === selectedCategory;
+        const activeClass = active ? 'bg-slate-900 text-white shadow-md' : 'bg-white text-slate-600 hover:bg-slate-200 border border-slate-200';
+        return `<button onclick="selectCategory('${cat}')" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition ${activeClass}">${cat}</button>`;
+      }).join('');
+    }
+
+    function selectCategory(cat) {
+      selectedCategory = cat;
+      renderCategoryPills();
+      filterCatalog();
+    }
+
+    // Catalog Rendering
+    function renderCatalog() {
+      filterCatalog();
+    }
+
+    function filterCatalog() {
+      const query = document.getElementById('catalog-search').value.toLowerCase().trim();
+      const grid = document.getElementById('products-grid');
+      const emptyState = document.getElementById('catalog-empty');
+
+      const filtered = products.filter(p => {
+        if (!p.active) return false;
+        const matchCat = selectedCategory === 'Todas' || p.category === selectedCategory;
+        const matchSearch = p.name.toLowerCase().includes(query) || p.desc.toLowerCase().includes(query) || p.category.toLowerCase().includes(query);
+        return matchCat && matchSearch;
+      });
+
+      if (filtered.length === 0) {
+        grid.innerHTML = '';
+        emptyState.classList.remove('hidden');
+        return;
+      }
+
+      emptyState.classList.add('hidden');
+      grid.innerHTML = filtered.map(p => `
+        <div class="bg-white rounded-2xl border border-slate-200 shadow-xs hover:shadow-md transition overflow-hidden flex flex-col group cursor-pointer" onclick="openDetailModal('${p.id}')">
+          <div class="relative bg-slate-100 aspect-square overflow-hidden">
+            <img src="${p.img || 'https://via.placeholder.com/300'}" alt="${p.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+            <span class="absolute top-2 left-2 bg-slate-900/70 backdrop-blur-sm text-white text-[10px] font-bold px-2 py-0.5 rounded-lg">
+              ${p.category}
+            </span>
+          </div>
+
+          <div class="p-3 sm:p-4 flex flex-col flex-grow">
+            <h3 class="font-bold text-slate-800 text-sm sm:text-base line-clamp-1 group-hover:text-emerald-600 transition">${p.name}</h3>
+            <p class="text-xs text-slate-500 line-clamp-2 mt-1 mb-3">${p.desc || 'Sin descripción'}</p>
+
+            <div class="mt-auto flex items-center justify-between gap-2 pt-2 border-t border-slate-100">
+              <span class="font-extrabold text-slate-900 text-sm sm:text-base">${config.currency} ${p.price.toFixed(2)}</span>
+              <button onclick="event.stopPropagation(); addToCart('${p.id}')" class="bg-brand-50 hover:bg-emerald-600 hover:text-white text-emerald-700 p-2 rounded-xl transition flex items-center justify-center" title="Agregar al Carrito">
+                <i class="fa-solid fa-cart-plus text-sm"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+
+    // ================= DESCARGAS Y GUÍAS (VISTA PÚBLICA) =================
+    function renderDownloads() {
+      const container = document.getElementById('downloads-list');
+      if (downloads.length === 0) {
+        container.innerHTML = `<p class="col-span-full text-center py-10 text-slate-400">No hay archivos de descarga disponibles por el momento.</p>`;
+        return;
+      }
+
+      container.innerHTML = downloads.map(d => `
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between space-y-4">
+          <div>
+            <div class="flex items-center gap-3 mb-2">
+              <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg">
+                <i class="fa-solid fa-file-arrow-down"></i>
+              </div>
+              <h3 class="font-bold text-slate-800 text-base leading-tight">${d.title}</h3>
+            </div>
+            <p class="text-xs text-slate-500 leading-relaxed">${d.desc || 'Sin descripción adicional.'}</p>
+          </div>
+
+          <div class="flex items-center gap-2 pt-2 border-t border-slate-100">
+            <button onclick="copyToClipboard('${d.url}', this)" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition flex items-center gap-1.5" title="Copiar URL">
+              <i class="fa-regular fa-copy"></i>
+              <span>Copiar URL</span>
+            </button>
+
+            <a href="${d.url}" target="_blank" rel="noopener noreferrer" class="flex-grow py-2 px-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl transition text-center flex items-center justify-center gap-1.5">
+              <i class="fa-solid fa-download"></i>
+              <span>Descargar</span>
+            </a>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderGuides() {
+      const container = document.getElementById('guides-list');
+      if (guides.length === 0) {
+        container.innerHTML = `<p class="col-span-full text-center py-10 text-slate-400">No hay guías de instalación disponibles por el momento.</p>`;
+        return;
+      }
+
+      container.innerHTML = guides.map(g => {
+        const embedUrl = getYouTubeEmbedUrl(g.video);
+        return `
+          <div class="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden flex flex-col">
+            <div class="aspect-video bg-black relative">
+              ${embedUrl ? `<iframe src="${embedUrl}" class="w-full h-full" frameborder="0" allowfullscreen></iframe>` : `<div class="flex items-center justify-center h-full text-white text-xs">Video no disponible o enlace no válido</div>`}
+            </div>
+            <div class="p-5 flex flex-col flex-grow">
+              <h3 class="font-bold text-slate-900 text-lg mb-2 flex items-center gap-2">
+                <i class="fa-solid fa-circle-play text-red-500"></i> ${g.title}
+              </h3>
+              <p class="text-xs text-slate-600 whitespace-pre-line leading-relaxed bg-slate-50 p-3.5 rounded-2xl border border-slate-100">${g.steps || 'Sigue las instrucciones del video para completar la instalación.'}</p>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function getYouTubeEmbedUrl(url) {
+      if (!url) return '';
+      let videoId = '';
+      if (url.includes('youtu.be/')) {
+        videoId = url.split('youtu.be/')[1]?.split('?')[0];
+      } else if (url.includes('youtube.com/watch')) {
+        const urlParams = new URLSearchParams(url.split('?')[1]);
+        videoId = urlParams.get('v');
+      }
+      return videoId ? `https://www.youtube.com/embed/${videoId}` : url;
+    }
+
+    function copyToClipboard(text, btnElement) {
+      navigator.clipboard.writeText(text).then(() => {
+        const originalText = btnElement.innerHTML;
+        btnElement.innerHTML = `<i class="fa-solid fa-check text-emerald-600"></i> <span class="text-emerald-600">¡Copiado!</span>`;
+        setTimeout(() => {
+          btnElement.innerHTML = originalText;
+        }, 2000);
+      });
+    }
+
+
+    // ================= DETALLES DEL PRODUCTO =================
+    function openDetailModal(id) {
+      const product = products.find(p => p.id === id);
+      if (!product) return;
+
+      currentDetailProduct = product;
+      currentDetailQty = 1;
+
+      document.getElementById('detail-img').src = product.img || 'https://via.placeholder.com/500';
+      document.getElementById('detail-title').innerText = product.name;
+      document.getElementById('detail-category').innerText = product.category;
+      document.getElementById('detail-price').innerText = `${config.currency} ${product.price.toFixed(2)}`;
+      document.getElementById('detail-desc').innerText = product.desc || 'Este producto no cuenta con especificaciones detalladas adicionales.';
+      document.getElementById('detail-qty').innerText = currentDetailQty;
+
+      document.getElementById('modal-product-detail').classList.remove('hidden');
+    }
+
+    function closeDetailModal() {
+      document.getElementById('modal-product-detail').classList.add('hidden');
+      currentDetailProduct = null;
+    }
+
+    function adjustDetailQty(delta) {
+      currentDetailQty += delta;
+      if (currentDetailQty < 1) currentDetailQty = 1;
+      document.getElementById('detail-qty').innerText = currentDetailQty;
+    }
+
+    function addCurrentDetailToCart() {
+      if (!currentDetailProduct) return;
+      addToCart(currentDetailProduct.id, currentDetailQty);
+      closeDetailModal();
+    }
+
+
+    // ================= CARRITO DE COMPRAS & MÉTODOS DE PAGO =================
+    function addToCart(productId, qtyToAdd = 1) {
+      const product = products.find(p => p.id === productId);
+      if (!product) return;
+
+      const existing = cart.find(item => item.id === productId);
+      if (existing) {
+        existing.qty += qtyToAdd;
+      } else {
+        cart.push({ id: product.id, name: product.name, price: product.price, qty: qtyToAdd, img: product.img });
+      }
+
+      saveAllState();
+      updateCartUI();
+    }
+
+    function updateCartQty(productId, delta) {
+      const item = cart.find(i => i.id === productId);
+      if (!item) return;
+
+      item.qty += delta;
+      if (item.qty <= 0) {
+        cart = cart.filter(i => i.id !== productId);
+      }
+
+      saveAllState();
+      updateCartUI();
+    }
+
+    function renderPaymentOptions() {
+      const container = document.getElementById('payment-options-container');
+      let options = [
+        { id: 'whatsapp', name: 'Acordar por WA', icon: 'fa-brands fa-whatsapp text-emerald-600' }
+      ];
+
+      if (paymentMethods.yape?.active) options.push({ id: 'yape', name: 'Yape', icon: 'fa-solid fa-mobile-screen text-purple-600' });
+      if (paymentMethods.plin?.active) options.push({ id: 'plin', name: 'Plin', icon: 'fa-solid fa-mobile-screen-button text-sky-600' });
+      if (paymentMethods.usdt?.active) options.push({ id: 'usdt', name: 'USDT / Binance', icon: 'fa-brands fa-bitcoin text-amber-500' });
+      if (paymentMethods.worldcoin?.active) options.push({ id: 'worldcoin', name: 'Worldcoin (WLD)', icon: 'fa-solid fa-earth-americas text-slate-800' });
+
+      container.innerHTML = options.map(opt => {
+        const isSelected = selectedPaymentMethod === opt.id;
+        const activeBg = isSelected ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100';
+        return `
+          <button onclick="selectPaymentMethod('${opt.id}')" class="p-2.5 rounded-xl border font-bold flex items-center justify-center gap-1.5 transition ${activeBg}">
+            <i class="${opt.icon}"></i>
+            <span>${opt.name}</span>
+          </button>
+        `;
+      }).join('');
+
+      updateQRPreview();
+    }
+
+    function selectPaymentMethod(id) {
+      selectedPaymentMethod = id;
+      renderPaymentOptions();
+    }
+
+    function updateQRPreview() {
+      const qrBox = document.getElementById('qr-preview-box');
+      const title = document.getElementById('qr-info-title');
+      const detail = document.getElementById('qr-info-detail');
+      const img = document.getElementById('qr-info-img');
+
+      if (selectedPaymentMethod === 'yape' && paymentMethods.yape?.active) {
+        qrBox.classList.remove('hidden');
+        title.innerText = `Pago por Yape (${paymentMethods.yape.name || 'Akitodo'})`;
+        detail.innerText = `Número: ${paymentMethods.yape.number || config.phone}`;
+        img.src = paymentMethods.yape.qr || 'https://via.placeholder.com/200?text=QR+Yape+no+configurado';
+      } else if (selectedPaymentMethod === 'plin' && paymentMethods.plin?.active) {
+        qrBox.classList.remove('hidden');
+        title.innerText = `Pago por Plin (${paymentMethods.plin.name || 'Akitodo'})`;
+        detail.innerText = `Número: ${paymentMethods.plin.number || config.phone}`;
+        img.src = paymentMethods.plin.qr || 'https://via.placeholder.com/200?text=QR+Plin+no+configurado';
+      } else if (selectedPaymentMethod === 'usdt' && paymentMethods.usdt?.active) {
+        qrBox.classList.remove('hidden');
+        title.innerText = `Pago con USDT (${paymentMethods.usdt.network || 'TRC20'})`;
+        detail.innerText = `Wallet / ID: ${paymentMethods.usdt.wallet || 'No configurado'}`;
+        img.src = paymentMethods.usdt.qr || 'https://via.placeholder.com/200?text=QR+USDT+no+configurado';
+      } else if (selectedPaymentMethod === 'worldcoin' && paymentMethods.worldcoin?.active) {
+        qrBox.classList.remove('hidden');
+        title.innerText = `Pago con Worldcoin (${paymentMethods.worldcoin.network || 'World App'})`;
+        detail.innerText = `Wallet / Username: ${paymentMethods.worldcoin.wallet || 'No configurado'}`;
+        img.src = paymentMethods.worldcoin.qr || 'https://via.placeholder.com/200?text=QR+Worldcoin+no+configurado';
+      } else {
+        qrBox.classList.add('hidden');
+      }
+    }
+
+    function updateCartUI() {
+      const totalItems = cart.reduce((acc, item) => acc + item.qty, 0);
+      const totalPrice = cart.reduce((acc, item) => acc + (item.price * item.qty), 0);
+
+      document.getElementById('cart-badge-count').innerText = totalItems;
+      document.getElementById('cart-badge-total').innerText = `${config.currency} ${totalPrice.toFixed(2)}`;
+      document.getElementById('cart-modal-total').innerText = `${config.currency} ${totalPrice.toFixed(2)}`;
+
+      const listContainer = document.getElementById('cart-items-list');
+
+      if (cart.length === 0) {
+        listContainer.innerHTML = `
+          <div class="text-center py-12 text-slate-400">
+            <i class="fa-solid fa-basket-shopping text-4xl mb-2"></i>
+            <p class="text-sm">Tu carrito está vacío.</p>
+          </div>
+        `;
+        renderPaymentOptions();
+        return;
+      }
+
+      listContainer.innerHTML = cart.map(item => `
+        <div class="flex items-center justify-between bg-slate-50 p-3 rounded-2xl border border-slate-200">
+          <div class="flex items-center space-x-3">
+            <img src="${item.img || 'https://via.placeholder.com/80'}" class="w-12 h-12 object-cover rounded-xl bg-white">
+            <div>
+              <h4 class="font-bold text-slate-800 text-xs sm:text-sm leading-tight">${item.name}</h4>
+              <p class="text-xs text-emerald-600 font-bold">${config.currency} ${item.price.toFixed(2)}</p>
+            </div>
+          </div>
+
+          <div class="flex items-center border border-slate-300 rounded-xl overflow-hidden bg-white">
+            <button onclick="updateCartQty('${item.id}', -1)" class="px-2.5 py-1 text-slate-600 hover:bg-slate-100 font-bold text-xs">-</button>
+            <span class="px-2 text-xs font-bold text-slate-800">${item.qty}</span>
+            <button onclick="updateCartQty('${item.id}', 1)" class="px-2.5 py-1 text-slate-600 hover:bg-slate-100 font-bold text-xs">+</button>
+          </div>
+        </div>
+      `).join('');
+
+      renderPaymentOptions();
+    }
+
+    function openCartModal() {
+      document.getElementById('modal-cart').classList.remove('hidden');
+    }
+
+    function closeCartModal() {
+      document.getElementById('modal-cart').classList.add('hidden');
+    }
+
+    function sendOrderToWhatsApp() {
+      if (cart.length === 0) {
+        alert('Agrega al menos un producto al carrito para realizar tu pedido.');
+        return;
+      }
+
+      let msg = `Hola *${config.name}*, me gustaría realizar el siguiente pedido:\n\n`;
+      let total = 0;
+
+      cart.forEach(item => {
+        const sub = item.price * item.qty;
+        total += sub;
+        msg += `• *${item.name}* (x${item.qty}) - ${config.currency} ${sub.toFixed(2)}\n`;
+      });
+
+      msg += `\n*Total Estimado:* ${config.currency} ${total.toFixed(2)}\n`;
+      
+      let payName = 'A coordinar por WhatsApp';
+      if (selectedPaymentMethod === 'yape') payName = `Yape (Número: ${paymentMethods.yape.number})`;
+      if (selectedPaymentMethod === 'plin') payName = `Plin (Número: ${paymentMethods.plin.number})`;
+      if (selectedPaymentMethod === 'usdt') payName = `USDT (${paymentMethods.usdt.network})`;
+      if (selectedPaymentMethod === 'worldcoin') payName = `Worldcoin / WLD (${paymentMethods.worldcoin.network})`;
+
+      msg += `*Método de Pago Seleccionado:* ${payName}\n\n`;
+      msg += `¿Me indican los siguientes pasos para confirmar el pago y el envío? ¡Muchas gracias!`;
+
+      const cleanPhone = config.phone.replace(/[^0-9]/g, '');
+      const url = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
+      window.open(url, '_blank');
+    }
+
+
+    // ================= FUNCIONES ADMIN =================
+    function renderAdminTable() {
+      const tbody = document.getElementById('admin-products-tbody');
+      const search = document.getElementById('admin-search')?.value.toLowerCase().trim() || '';
+
+      const filtered = products.filter(p => p.name.toLowerCase().includes(search) || p.category.toLowerCase().includes(search));
+
+      // Stats
+      document.getElementById('stat-total-products').innerText = products.length;
+      document.getElementById('stat-active-products').innerText = products.filter(p => p.active).length;
+      document.getElementById('stat-total-categories').innerText = categories.length;
+
+      tbody.innerHTML = filtered.map(p => `
+        <tr class="hover:bg-slate-50 transition">
+          <td class="py-3 px-4 flex items-center space-x-3">
+            <img src="${p.img || 'https://via.placeholder.com/50'}" class="w-10 h-10 object-cover rounded-xl bg-slate-100">
+            <div>
+              <div class="font-bold text-slate-800">${p.name}</div>
+              <div class="text-xs text-slate-400 max-w-xs truncate">${p.desc || 'Sin descripción'}</div>
+            </div>
+          </td>
+          <td class="py-3 px-4">
+            <span class="bg-slate-100 text-slate-700 text-xs px-2.5 py-1 rounded-lg font-semibold">${p.category}</span>
+          </td>
+          <td class="py-3 px-4 font-bold text-slate-900">${config.currency} ${p.price.toFixed(2)}</td>
+          <td class="py-3 px-4 text-center">
+            <button onclick="toggleProductStatus('${p.id}')" class="px-2.5 py-1 rounded-full text-xs font-bold transition ${p.active ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">
+              ${p.active ? 'Disponible' : 'Oculto'}
+            </button>
+          </td>
+          <td class="py-3 px-4 text-right space-x-1">
+            <button onclick="editProduct('${p.id}')" class="p-2 text-slate-500 hover:text-emerald-600 transition"><i class="fa-solid fa-pen-to-square"></i></button>
+            <button onclick="deleteProduct('${p.id}')" class="p-2 text-slate-500 hover:text-rose-600 transition"><i class="fa-solid fa-trash-can"></i></button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    // Categorías Admin
+    function renderCategoriesAdminList() {
+      const list = document.getElementById('admin-categories-list');
+      list.innerHTML = categories.map((cat, idx) => `
+        <li class="p-3.5 flex justify-between items-center text-sm">
+          <span class="font-semibold text-slate-700">${cat}</span>
+          <button onclick="deleteCategory(${idx})" class="text-rose-500 hover:text-rose-700 p-1 transition"><i class="fa-solid fa-trash-can"></i></button>
+        </li>
+      `).join('');
+    }
+
+    function handleAddCategory(e) {
+      e.preventDefault();
+      const input = document.getElementById('new-cat-name');
+      const val = input.value.trim();
+
+      if (val && !categories.includes(val)) {
+        categories.push(val);
+        input.value = '';
+        saveAllState();
+        renderCategoriesAdminList();
+        renderCategoryPills();
+      }
+    }
+
+    function deleteCategory(index) {
+      if (confirm(`¿Eliminar la categoría "${categories[index]}"?`)) {
+        categories.splice(index, 1);
+        saveAllState();
+        renderCategoriesAdminList();
+        renderCategoryPills();
+      }
+    }
+
+    // Descargas y Guías Admin
+    function renderAdminDownloadsAndGuides() {
+      const dlList = document.getElementById('admin-downloads-list');
+      dlList.innerHTML = downloads.map((d, i) => `
+        <li class="py-2.5 flex justify-between items-center">
+          <div>
+            <div class="font-bold text-slate-800">${d.title}</div>
+            <div class="text-xs text-slate-400 truncate max-w-sm">${d.url}</div>
+          </div>
+          <button onclick="deleteDownloadResource(${i})" class="text-rose-500 hover:text-rose-700 p-1 transition"><i class="fa-solid fa-trash-can"></i></button>
+        </li>
+      `).join('');
+
+      const gList = document.getElementById('admin-guides-list');
+      gList.innerHTML = guides.map((g, i) => `
+        <li class="py-2.5 flex justify-between items-center">
+          <div>
+            <div class="font-bold text-slate-800">${g.title}</div>
+            <div class="text-xs text-slate-400 truncate max-w-sm">${g.video}</div>
+          </div>
+          <button onclick="deleteGuideResource(${i})" class="text-rose-500 hover:text-rose-700 p-1 transition"><i class="fa-solid fa-trash-can"></i></button>
+        </li>
+      `).join('');
+    }
+
+    function handleAddDownloadResource(e) {
+      e.preventDefault();
+      const title = document.getElementById('dl-title').value.trim();
+      const url = document.getElementById('dl-url').value.trim();
+      const desc = document.getElementById('dl-desc').value.trim();
+
+      downloads.push({ id: 'd_' + Date.now(), title, url, desc });
+      saveAllState();
+      renderAdminDownloadsAndGuides();
+      renderDownloads();
+
+      document.getElementById('dl-title').value = '';
+      document.getElementById('dl-url').value = '';
+      document.getElementById('dl-desc').value = '';
+    }
+
+    function deleteDownloadResource(index) {
+      if (confirm('¿Deseas eliminar este recurso de descarga?')) {
+        downloads.splice(index, 1);
+        saveAllState();
+        renderAdminDownloadsAndGuides();
+        renderDownloads();
+      }
+    }
+
+    function handleAddGuide(e) {
+      e.preventDefault();
+      const title = document.getElementById('guide-title').value.trim();
+      const video = document.getElementById('guide-video').value.trim();
+      const steps = document.getElementById('guide-steps').value.trim();
+
+      guides.push({ id: 'g_' + Date.now(), title, video, steps });
+      saveAllState();
+      renderAdminDownloadsAndGuides();
+      renderGuides();
+
+      document.getElementById('guide-title').value = '';
+      document.getElementById('guide-video').value = '';
+      document.getElementById('guide-steps').value = '';
+    }
+
+    function deleteGuideResource(index) {
+      if (confirm('¿Deseas eliminar esta guía en video?')) {
+        guides.splice(index, 1);
+        saveAllState();
+        renderAdminDownloadsAndGuides();
+        renderGuides();
+      }
+    }
+
+    // Métodos de Pago Admin
+    function loadPaymentMethodsAdmin() {
+      document.getElementById('pay-yape-active').checked = paymentMethods.yape?.active || false;
+      document.getElementById('pay-yape-num').value = paymentMethods.yape?.number || '';
+      document.getElementById('pay-yape-name').value = paymentMethods.yape?.name || '';
+      document.getElementById('pay-yape-qr').value = paymentMethods.yape?.qr || '';
+
+      document.getElementById('pay-plin-active').checked = paymentMethods.plin?.active || false;
+      document.getElementById('pay-plin-num').value = paymentMethods.plin?.number || '';
+      document.getElementById('pay-plin-name').value = paymentMethods.plin?.name || '';
+      document.getElementById('pay-plin-qr').value = paymentMethods.plin?.qr || '';
+
+      document.getElementById('pay-usdt-active').checked = paymentMethods.usdt?.active || false;
+      document.getElementById('pay-usdt-wallet').value = paymentMethods.usdt?.wallet || '';
+      document.getElementById('pay-usdt-network').value = paymentMethods.usdt?.network || '';
+      document.getElementById('pay-usdt-qr').value = paymentMethods.usdt?.qr || '';
+
+      document.getElementById('pay-worldcoin-active').checked = paymentMethods.worldcoin?.active || false;
+      document.getElementById('pay-worldcoin-wallet').value = paymentMethods.worldcoin?.wallet || '';
+      document.getElementById('pay-worldcoin-network').value = paymentMethods.worldcoin?.network || '';
+      document.getElementById('pay-worldcoin-qr').value = paymentMethods.worldcoin?.qr || '';
+    }
+
+    function savePaymentMethods(e) {
+      e.preventDefault();
+      paymentMethods = {
+        yape: {
+          active: document.getElementById('pay-yape-active').checked,
+          number: document.getElementById('pay-yape-num').value.trim(),
+          name: document.getElementById('pay-yape-name').value.trim(),
+          qr: document.getElementById('pay-yape-qr').value.trim()
+        },
+        plin: {
+          active: document.getElementById('pay-plin-active').checked,
+          number: document.getElementById('pay-plin-num').value.trim(),
+          name: document.getElementById('pay-plin-name').value.trim(),
+          qr: document.getElementById('pay-plin-qr').value.trim()
+        },
+        usdt: {
+          active: document.getElementById('pay-usdt-active').checked,
+          wallet: document.getElementById('pay-usdt-wallet').value.trim(),
+          network: document.getElementById('pay-usdt-network').value.trim(),
+          qr: document.getElementById('pay-usdt-qr').value.trim()
+        },
+        worldcoin: {
+          active: document.getElementById('pay-worldcoin-active').checked,
+          wallet: document.getElementById('pay-worldcoin-wallet').value.trim(),
+          network: document.getElementById('pay-worldcoin-network').value.trim(),
+          qr: document.getElementById('pay-worldcoin-qr').value.trim()
+        }
+      };
+
+      saveAllState();
+      updateCartUI();
+      alert('¡Métodos de Pago y códigos QR actualizados con éxito!');
+    }
+
+    // Modal Crear/Editar Producto
+    function openProductModal(prod = null) {
+      const select = document.getElementById('prod-category');
+      select.innerHTML = categories.map(c => `<option value="${c}">${c}</option>`).join('');
+
+      if (prod) {
+        document.getElementById('product-modal-title').innerText = 'Editar Producto';
+        document.getElementById('prod-id').value = prod.id;
+        document.getElementById('prod-name').value = prod.name;
+        document.getElementById('prod-price').value = prod.price;
+        document.getElementById('prod-category').value = prod.category;
+        document.getElementById('prod-img').value = prod.img || '';
+        document.getElementById('prod-desc').value = prod.desc || '';
+        document.getElementById('prod-active').checked = prod.active;
+      } else {
+        document.getElementById('product-modal-title').innerText = 'Nuevo Producto';
+        document.getElementById('form-product').reset();
+        document.getElementById('prod-id').value = '';
+        document.getElementById('prod-active').checked = true;
+      }
+
+      document.getElementById('modal-product').classList.remove('hidden');
+    }
+
+    function closeProductModal() {
+      document.getElementById('modal-product').classList.add('hidden');
+    }
+
+    function saveProduct(e) {
+      e.preventDefault();
+      const id = document.getElementById('prod-id').value;
+      const name = document.getElementById('prod-name').value.trim();
+      const price = parseFloat(document.getElementById('prod-price').value);
+      const category = document.getElementById('prod-category').value;
+      const img = document.getElementById('prod-img').value.trim();
+      const desc = document.getElementById('prod-desc').value.trim();
+      const active = document.getElementById('prod-active').checked;
+
+      if (id) {
+        const p = products.find(prod => prod.id === id);
+        if (p) {
+          p.name = name;
+          p.price = price;
+          p.category = category;
+          p.img = img;
+          p.desc = desc;
+          p.active = active;
+        }
+      } else {
+        const newProd = {
+          id: 'p_' + Date.now(),
+          name, price, category, img, desc, active
+        };
+        products.push(newProd);
+      }
+
+      saveAllState();
+      closeProductModal();
+      renderAdminTable();
+      renderCatalog();
+    }
+
+    function editProduct(id) {
+      const p = products.find(prod => prod.id === id);
+      if (p) openProductModal(p);
+    }
+
+    function toggleProductStatus(id) {
+      const p = products.find(prod => prod.id === id);
+      if (p) {
+        p.active = !p.active;
+        saveAllState();
+        renderAdminTable();
+        renderCatalog();
+      }
+    }
+
+    function deleteProduct(id) {
+      if (confirm('¿Seguro de que deseas eliminar este producto?')) {
+        products = products.filter(p => p.id !== id);
+        saveAllState();
+        renderAdminTable();
+        renderCatalog();
+      }
+    }
+
+    // Configuración Tienda & Seguridad
+    function saveStoreConfig(e) {
+      e.preventDefault();
+      config.name = document.getElementById('cfg-name').value.trim();
+      config.slogan = document.getElementById('cfg-slogan').value.trim();
+      config.phone = document.getElementById('cfg-phone').value.trim();
+      config.currency = document.getElementById('cfg-currency').value.trim();
+      config.logo = document.getElementById('cfg-logo').value.trim();
+
+      saveAllState();
+      applyConfigUI();
+      renderCatalog();
+      alert('¡Configuración guardada exitosamente!');
+    }
+
+    function saveSecurityCredentials(e) {
+      e.preventDefault();
+      credentials.user = document.getElementById('sec-user').value.trim();
+      credentials.pass = document.getElementById('sec-pass').value.trim();
+
+      saveAllState();
+      alert('¡Credenciales actualizadas correctamente!');
+    }
+  </script>
+</body>
+</html>
