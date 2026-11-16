@@ -1,21 +1,22 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" class="h-full">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Catálogo Digital & Panel Administrador</title>
+  <title>Catálogo Digital Pro & Panel de Control</title>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  
+
   <!-- Font Awesome Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   
   <!-- Inter Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
   <script>
     tailwind.config = {
+      darkMode: 'class',
       theme: {
         extend: {
           fontFamily: {
@@ -31,6 +32,10 @@
               whatsapp: '#25D366',
               waDark: '#128C7E'
             }
+          },
+          boxShadow: {
+            'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.08)',
+            'glass-dark': '0 8px 32px 0 rgba(0, 0, 0, 0.37)'
           }
         }
       }
@@ -38,24 +43,28 @@
   </script>
 
   <style>
-    /* Custom Scrollbar Styling */
+    /* Custom Scrollbar */
     ::-webkit-scrollbar {
       width: 6px;
       height: 6px;
     }
     ::-webkit-scrollbar-track {
-      background: #f1f5f9;
+      background: transparent;
     }
     ::-webkit-scrollbar-thumb {
       background: #cbd5e1;
-      border-radius: 4px;
+      border-radius: 9999px;
+    }
+    .dark ::-webkit-scrollbar-thumb {
+      background: #334155;
     }
     ::-webkit-scrollbar-thumb:hover {
       background: #94a3b8;
     }
+
     .modal-backdrop {
-      background-color: rgba(15, 23, 42, 0.6);
-      backdrop-filter: blur(4px);
+      background-color: rgba(15, 23, 42, 0.65);
+      backdrop-filter: blur(6px);
     }
     .no-scrollbar::-webkit-scrollbar {
       display: none;
@@ -64,46 +73,61 @@
       -ms-overflow-style: none;
       scrollbar-width: none;
     }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(12px);
+    }
+    .dark .glass-card {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(12px);
+    }
   </style>
 </head>
-<body class="bg-slate-100 text-slate-800 font-sans antialiased min-h-screen flex flex-col selection:bg-brand-500 selection:text-white">
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 font-sans antialiased min-h-screen flex flex-col selection:bg-brand-500 selection:text-white transition-colors duration-300">
 
-  <!-- Header Bar / Navigation -->
-  <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-xs">
+  <!-- ==================== HEADER / TOP NAV ==================== -->
+  <header class="bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 sticky top-0 z-30 shadow-sm transition-colors duration-300">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center h-16">
         
-        <!-- Brand Info con Imagen de Logo -->
-        <div class="flex items-center space-x-3 cursor-pointer" onclick="switchPublicView('catalog')">
-          <div class="w-10 h-10 rounded-xl overflow-hidden shadow-md border border-slate-200 bg-slate-900 flex items-center justify-center">
-            <img id="header-logo-img" src="" alt="Logo Tienda" class="w-full h-full object-cover">
+        <!-- Brand Info -->
+        <div class="flex items-center space-x-3 cursor-pointer group" onclick="switchPublicView('catalog')">
+          <div class="w-10 h-10 rounded-xl overflow-hidden shadow-md border border-slate-200 dark:border-slate-700 bg-slate-900 flex items-center justify-center transition-transform group-hover:scale-105">
+            <img id="header-logo-img" src="" alt="Logo Tienda" class="w-full h-full object-cover" onerror="this.src='https://placehold.co/100x100/10b981/ffffff?text=LOGO'">
           </div>
           <div>
-            <h1 class="font-bold text-slate-900 leading-tight text-base sm:text-lg flex items-center gap-2">
+            <h1 class="font-bold text-slate-900 dark:text-white leading-tight text-base sm:text-lg flex items-center gap-2">
               <span id="nav-store-name">Akitodo Service</span>
             </h1>
-            <p class="text-xs text-slate-500 flex items-center gap-1">
+            <p class="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
               <span class="inline-block w-2 h-2 rounded-full bg-brand-whatsapp animate-pulse"></span>
               <span id="nav-slogan">Pedidos directos por WhatsApp</span>
             </p>
           </div>
         </div>
 
-        <!-- Mode Navigation & Auth Control -->
+        <!-- Mode Navigation, Theme Toggle & Auth -->
         <div class="flex items-center space-x-2">
-          <div class="flex bg-slate-100 p-1 rounded-xl border border-slate-200">
-            <button id="btn-tab-catalog" onclick="switchTab('catalog')" class="flex items-center space-x-2 px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all shadow-sm bg-white text-slate-900">
-              <i class="fa-solid fa-store text-brand-600"></i>
-              <span>Catálogo</span>
+
+          <!-- Dark/Light Mode Toggle Button -->
+          <button onclick="toggleDarkMode()" class="p-2 rounded-xl text-slate-500 hover:text-slate-800 dark:text-slate-400 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="Cambiar Tema">
+            <i id="theme-icon-sun" class="fa-solid fa-sun text-amber-400 hidden text-base sm:text-lg"></i>
+            <i id="theme-icon-moon" class="fa-solid fa-moon text-slate-600 text-base sm:text-lg"></i>
+          </button>
+          
+          <div class="flex bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700">
+            <button id="btn-tab-catalog" onclick="switchTab('catalog')" class="flex items-center space-x-2 px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all shadow-xs bg-white dark:bg-slate-900 text-slate-900 dark:text-white">
+              <i class="fa-solid fa-store text-brand-600 dark:text-brand-500"></i>
+              <span class="hidden sm:inline">Catálogo</span>
             </button>
-            <button id="btn-tab-admin" onclick="switchTab('admin')" class="flex items-center space-x-2 px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 transition-all">
-              <i class="fa-solid fa-user-gear text-slate-500"></i>
-              <span>Panel Admin</span>
+            <button id="btn-tab-admin" onclick="switchTab('admin')" class="flex items-center space-x-2 px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all">
+              <i class="fa-solid fa-user-gear"></i>
+              <span class="hidden sm:inline">Panel Admin</span>
             </button>
           </div>
 
           <!-- Logout Button (Shown when logged in) -->
-          <button id="btn-logout" onclick="logoutAdmin()" class="hidden bg-rose-50 hover:bg-rose-100 text-rose-600 p-2 rounded-xl text-xs sm:text-sm font-bold border border-rose-200 transition flex items-center gap-1.5" title="Cerrar Sesión Admin">
+          <button id="btn-logout" onclick="logoutAdmin()" class="hidden bg-rose-50 dark:bg-rose-950/40 hover:bg-rose-100 dark:hover:bg-rose-900/60 text-rose-600 dark:text-rose-400 p-2 rounded-xl text-xs sm:text-sm font-bold border border-rose-200 dark:border-rose-800 transition flex items-center gap-1.5" title="Cerrar Sesión Admin">
             <i class="fa-solid fa-right-from-bracket"></i>
             <span class="hidden md:inline">Salir</span>
           </button>
@@ -113,39 +137,68 @@
     </div>
   </header>
 
+  <!-- ==================== MAIN CONTENT ==================== -->
   <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
 
-    <!-- ==================== VISTA CATÁLOGO Y RECURSOS ==================== -->
+    <!-- ==================== VISTA CATÁLOGO Y RECURSOS PÚBLICOS ==================== -->
     <div id="view-catalog" class="space-y-6">
       
-      <!-- Banner / Search Section -->
-      <div class="bg-gradient-to-r from-emerald-600 via-teal-700 to-emerald-800 rounded-3xl p-6 sm:p-8 text-white shadow-lg relative overflow-hidden">
+      <!-- Hero Banner / Search Section -->
+      <div class="bg-gradient-to-r from-emerald-600 via-teal-700 to-emerald-900 rounded-3xl p-6 sm:p-8 text-white shadow-lg relative overflow-hidden">
         <div class="absolute -right-10 -bottom-10 opacity-10 text-white text-9xl pointer-events-none">
           <i class="fa-solid fa-cart-flatbed font-black"></i>
         </div>
         <div class="relative z-10 max-w-2xl">
+          <span class="inline-block px-3 py-1 rounded-full bg-white/20 backdrop-blur-md text-xs font-bold tracking-wider uppercase mb-3">Catálogo Interactivo</span>
           <h2 class="text-2xl sm:text-4xl font-extrabold tracking-tight mb-2" id="banner-title">¡Haz tu pedido en línea!</h2>
           <p class="text-emerald-100 text-sm sm:text-base mb-6" id="banner-sub">Explora nuestro catálogo, recursos de descarga y guías de instalación paso a paso.</p>
           
           <!-- Search input -->
           <div id="search-bar-container" class="relative max-w-md">
             <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
-            <input type="text" id="catalog-search" oninput="filterCatalog()" placeholder="Buscar producto o categoría..." class="w-full pl-11 pr-4 py-3 rounded-2xl bg-white text-slate-900 placeholder-slate-400 text-sm border-0 focus:ring-4 focus:ring-emerald-300 shadow-md outline-none transition">
+            <input type="text" id="catalog-search" oninput="filterCatalog()" placeholder="Buscar producto o categoría..." class="w-full pl-11 pr-10 py-3 rounded-2xl bg-white dark:bg-slate-900 text-slate-900 dark:text-white placeholder-slate-400 text-sm border-0 focus:ring-4 focus:ring-emerald-300 dark:focus:ring-emerald-800 shadow-md outline-none transition">
+            <button onclick="clearSearch()" id="btn-clear-search" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+              <i class="fa-solid fa-xmark"></i>
+            </button>
           </div>
         </div>
       </div>
 
       <!-- Public Navigation Tabs (Catálogo, Descargas, Guía de Instalación) -->
-      <div class="flex items-center space-x-2 border-b border-slate-200 pb-2 overflow-x-auto no-scrollbar">
-        <button id="pub-tab-products" onclick="switchPublicView('catalog')" class="px-4 py-2 font-bold text-sm bg-slate-900 text-white rounded-xl shadow-xs transition flex items-center gap-2 whitespace-nowrap">
-          <i class="fa-solid fa-boxes-stacked"></i> Productos
-        </button>
-        <button id="pub-tab-downloads" onclick="switchPublicView('downloads')" class="px-4 py-2 font-semibold text-sm bg-white text-slate-600 hover:bg-slate-200 border border-slate-200 rounded-xl transition flex items-center gap-2 whitespace-nowrap">
-          <i class="fa-solid fa-download text-brand-600"></i> Descargas
-        </button>
-        <button id="pub-tab-guides" onclick="switchPublicView('guides')" class="px-4 py-2 font-semibold text-sm bg-white text-slate-600 hover:bg-slate-200 border border-slate-200 rounded-xl transition flex items-center gap-2 whitespace-nowrap">
-          <i class="fa-solid fa-circle-play text-red-500"></i> Guía de Instalación
-        </button>
+      <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-2 overflow-x-auto no-scrollbar gap-4">
+        <div class="flex items-center space-x-2">
+          <button id="pub-tab-products" onclick="switchPublicView('catalog')" class="px-4 py-2 font-bold text-sm bg-slate-900 dark:bg-emerald-600 text-white rounded-xl shadow-xs transition flex items-center gap-2 whitespace-nowrap">
+            <i class="fa-solid fa-boxes-stacked"></i> Productos
+          </button>
+          <button id="pub-tab-downloads" onclick="switchPublicView('downloads')" class="px-4 py-2 font-semibold text-sm bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 rounded-xl transition flex items-center gap-2 whitespace-nowrap">
+            <i class="fa-solid fa-download text-brand-600 dark:text-brand-500"></i> Descargas
+          </button>
+          <button id="pub-tab-guides" onclick="switchPublicView('guides')" class="px-4 py-2 font-semibold text-sm bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 rounded-xl transition flex items-center gap-2 whitespace-nowrap">
+            <i class="fa-solid fa-circle-play text-red-500"></i> Guías en Video
+          </button>
+        </div>
+
+        <!-- Controls: Grid/List View Toggle & Sort (Visible in Catalog) -->
+        <div id="catalog-controls" class="flex items-center space-x-2">
+          <!-- Sort Dropdown -->
+          <select id="catalog-sort" onchange="filterCatalog()" class="bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-800 text-xs rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-emerald-500 font-medium">
+            <option value="default">Ordenar por: Defecto</option>
+            <option value="price-low">Precio: Menor a Mayor</option>
+            <option value="price-high">Precio: Mayor a Menor</option>
+            <option value="name-asc">Nombre: A - Z</option>
+            <option value="name-desc">Nombre: Z - A</option>
+          </select>
+
+          <!-- Layout Toggle -->
+          <div class="flex bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-1">
+            <button id="btn-layout-grid" onclick="setLayout('grid')" class="p-1.5 rounded-lg text-brand-600 dark:text-brand-500 bg-slate-100 dark:bg-slate-800 transition" title="Vista Cuadrícula">
+              <i class="fa-solid fa-grip text-xs sm:text-sm"></i>
+            </button>
+            <button id="btn-layout-list" onclick="setLayout('list')" class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition" title="Vista Lista">
+              <i class="fa-solid fa-list text-xs sm:text-sm"></i>
+            </button>
+          </div>
+        </div>
       </div>
 
       <!-- Sub-Filter Categories (Only visible in Products view) -->
@@ -153,18 +206,18 @@
         <!-- Injected via JavaScript -->
       </div>
 
-      <!-- PRODUCTS GRID CONTAINER -->
+      <!-- PRODUCTS SECTION -->
       <div id="public-sec-products" class="space-y-6">
         <div id="products-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6">
           <!-- Products injected via JS -->
         </div>
 
-        <div id="catalog-empty" class="hidden py-16 text-center bg-white rounded-3xl border border-slate-200">
-          <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center text-2xl">
+        <div id="catalog-empty" class="hidden py-16 text-center bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800">
+          <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-400 flex items-center justify-center text-2xl">
             <i class="fa-solid fa-box-open"></i>
           </div>
-          <h3 class="text-lg font-bold text-slate-700 mb-1">No hay productos disponibles</h3>
-          <p class="text-slate-500 text-sm">Prueba buscar con otro término o seleccionar otra categoría.</p>
+          <h3 class="text-lg font-bold text-slate-700 dark:text-slate-200 mb-1">No se encontraron productos</h3>
+          <p class="text-slate-500 dark:text-slate-400 text-sm">Prueba buscando con otro término o seleccionando otra categoría.</p>
         </div>
       </div>
 
@@ -186,38 +239,38 @@
 
     <!-- ==================== VISTA LOGIN ADMIN ==================== -->
     <div id="view-login" class="hidden py-12 flex justify-center items-center">
-      <div class="bg-white p-8 rounded-3xl border border-slate-200 shadow-xl w-full max-w-md">
+      <div class="bg-white dark:bg-slate-900 p-8 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xl w-full max-w-md transition-colors">
         
         <div class="text-center mb-6">
-          <div class="w-14 h-14 mx-auto mb-3 rounded-2xl bg-gradient-to-tr from-brand-whatsapp to-brand-waDark text-white flex items-center justify-center text-2xl shadow-lg shadow-emerald-200">
+          <div class="w-14 h-14 mx-auto mb-3 rounded-2xl bg-gradient-to-tr from-brand-whatsapp to-brand-waDark text-white flex items-center justify-center text-2xl shadow-lg shadow-emerald-200 dark:shadow-none">
             <i class="fa-solid fa-lock"></i>
           </div>
-          <h2 class="text-2xl font-extrabold text-slate-900">Acceso Administrador</h2>
-          <p class="text-xs sm:text-sm text-slate-500 mt-1">Ingresa tus credenciales para administrar el catálogo.</p>
+          <h2 class="text-2xl font-extrabold text-slate-900 dark:text-white">Acceso Administrador</h2>
+          <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">Ingresa tus credenciales para administrar el catálogo.</p>
         </div>
 
         <form id="form-login" onsubmit="handleLogin(event)" class="space-y-4">
           <div>
-            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Usuario</label>
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Usuario</label>
             <div class="relative">
               <i class="fa-solid fa-user absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-              <input type="text" id="login-user" required placeholder="Ingresa usuario" class="w-full pl-10 pr-3 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none">
+              <input type="text" id="login-user" required placeholder="Ingresa usuario" class="w-full pl-10 pr-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
             </div>
           </div>
 
           <div>
-            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-1">Contraseña</label>
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 uppercase tracking-wider mb-1">Contraseña</label>
             <div class="relative">
               <i class="fa-solid fa-key absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-sm"></i>
-              <input type="password" id="login-pass" required placeholder="••••••••" class="w-full pl-10 pr-3 py-2.5 rounded-xl border border-slate-300 text-sm focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 outline-none">
+              <input type="password" id="login-pass" required placeholder="••••••••" class="w-full pl-10 pr-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
             </div>
           </div>
 
-          <div id="login-error" class="hidden p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-xs font-medium text-center">
+          <div id="login-error" class="hidden p-3 bg-red-50 dark:bg-red-950/50 border border-red-200 dark:border-red-800 rounded-xl text-red-600 dark:text-red-400 text-xs font-medium text-center">
             <i class="fa-solid fa-triangle-exclamation mr-1"></i> Usuario o contraseña incorrectos.
           </div>
 
-          <button type="submit" class="w-full py-3 bg-brand-whatsapp hover:bg-emerald-600 text-white font-bold rounded-xl shadow-lg shadow-emerald-200 transition flex items-center justify-center space-x-2 text-sm">
+          <button type="submit" class="w-full py-3 bg-brand-whatsapp hover:bg-emerald-600 text-white font-bold rounded-xl shadow-lg shadow-emerald-200 dark:shadow-none transition flex items-center justify-center space-x-2 text-sm">
             <i class="fa-solid fa-right-to-bracket"></i>
             <span>Iniciar Sesión</span>
           </button>
@@ -230,41 +283,41 @@
     <div id="view-admin" class="hidden space-y-6">
       
       <!-- Top Admin Header -->
-      <div class="bg-white p-5 rounded-3xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div class="bg-white dark:bg-slate-900 p-5 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
-            <i class="fa-solid fa-gauge-high text-brand-600"></i>
-            Panel de Control Akitodo Service
+          <h2 class="text-xl font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <i class="fa-solid fa-gauge-high text-brand-600 dark:text-brand-500"></i>
+            Panel de Control Akitodo
           </h2>
-          <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Administra tu inventario, categorías, descargas, guías en video y seguridad.</p>
+          <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-0.5">Gestiona productos, descargas, guías, formas de pago y configuraciones generales.</p>
         </div>
 
         <div class="flex items-center gap-2">
-          <button onclick="openProductModal()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-xl shadow-md shadow-emerald-200 transition flex items-center gap-2">
+          <button onclick="openProductModal()" class="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold rounded-xl shadow-md transition flex items-center gap-2">
             <i class="fa-solid fa-plus"></i> Nuevo Producto
           </button>
         </div>
       </div>
 
       <!-- Admin Tabs Navigation -->
-      <div class="flex space-x-2 border-b border-slate-200 overflow-x-auto no-scrollbar">
-        <button id="admin-tab-products" onclick="switchAdminTab('products')" class="px-4 py-2.5 font-bold text-sm border-b-2 border-brand-600 text-brand-600 flex items-center gap-2 whitespace-nowrap">
+      <div class="flex space-x-2 border-b border-slate-200 dark:border-slate-800 overflow-x-auto no-scrollbar">
+        <button id="admin-tab-products" onclick="switchAdminTab('products')" class="px-4 py-2.5 font-bold text-sm border-b-2 border-brand-600 dark:border-brand-500 text-brand-600 dark:text-brand-400 flex items-center gap-2 whitespace-nowrap">
           <i class="fa-solid fa-box"></i> Productos
         </button>
-        <button id="admin-tab-categories" onclick="switchAdminTab('categories')" class="px-4 py-2.5 font-semibold text-sm text-slate-500 border-b-2 border-transparent hover:text-slate-800 flex items-center gap-2 whitespace-nowrap">
+        <button id="admin-tab-categories" onclick="switchAdminTab('categories')" class="px-4 py-2.5 font-semibold text-sm text-slate-500 dark:text-slate-400 border-b-2 border-transparent hover:text-slate-800 dark:hover:text-white flex items-center gap-2 whitespace-nowrap">
           <i class="fa-solid fa-tags"></i> Categorías
         </button>
-        <button id="admin-tab-downloads" onclick="switchAdminTab('downloads')" class="px-4 py-2.5 font-semibold text-sm text-slate-500 border-b-2 border-transparent hover:text-slate-800 flex items-center gap-2 whitespace-nowrap">
+        <button id="admin-tab-downloads" onclick="switchAdminTab('downloads')" class="px-4 py-2.5 font-semibold text-sm text-slate-500 dark:text-slate-400 border-b-2 border-transparent hover:text-slate-800 dark:hover:text-white flex items-center gap-2 whitespace-nowrap">
           <i class="fa-solid fa-download"></i> Descargas & Guías
         </button>
-        <button id="admin-tab-payments" onclick="switchAdminTab('payments')" class="px-4 py-2.5 font-semibold text-sm text-slate-500 border-b-2 border-transparent hover:text-slate-800 flex items-center gap-2 whitespace-nowrap">
-          <i class="fa-solid fa-qrcode"></i> Métodos de Pago & QRs
+        <button id="admin-tab-payments" onclick="switchAdminTab('payments')" class="px-4 py-2.5 font-semibold text-sm text-slate-500 dark:text-slate-400 border-b-2 border-transparent hover:text-slate-800 dark:hover:text-white flex items-center gap-2 whitespace-nowrap">
+          <i class="fa-solid fa-qrcode"></i> Métodos de Pago
         </button>
-        <button id="admin-tab-config" onclick="switchAdminTab('config')" class="px-4 py-2.5 font-semibold text-sm text-slate-500 border-b-2 border-transparent hover:text-slate-800 flex items-center gap-2 whitespace-nowrap">
+        <button id="admin-tab-config" onclick="switchAdminTab('config')" class="px-4 py-2.5 font-semibold text-sm text-slate-500 dark:text-slate-400 border-b-2 border-transparent hover:text-slate-800 dark:hover:text-white flex items-center gap-2 whitespace-nowrap">
           <i class="fa-solid fa-sliders"></i> Configuración Tienda
         </button>
-        <button id="admin-tab-security" onclick="switchAdminTab('security')" class="px-4 py-2.5 font-semibold text-sm text-slate-500 border-b-2 border-transparent hover:text-slate-800 flex items-center gap-2 whitespace-nowrap">
-          <i class="fa-solid fa-shield-halved"></i> Seguridad & Credenciales
+        <button id="admin-tab-security" onclick="switchAdminTab('security')" class="px-4 py-2.5 font-semibold text-sm text-slate-500 dark:text-slate-400 border-b-2 border-transparent hover:text-slate-800 dark:hover:text-white flex items-center gap-2 whitespace-nowrap">
+          <i class="fa-solid fa-shield-halved"></i> Seguridad
         </button>
       </div>
 
@@ -272,35 +325,35 @@
       <div id="admin-sec-products" class="space-y-4">
         <!-- Stats Widgets -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
-            <div class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Total Productos</div>
-            <div class="text-2xl font-extrabold text-slate-900" id="stat-total-products">0</div>
+          <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+            <div class="text-slate-400 dark:text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Total Productos</div>
+            <div class="text-2xl font-extrabold text-slate-900 dark:text-white" id="stat-total-products">0</div>
           </div>
-          <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
-            <div class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Activos / En Stock</div>
-            <div class="text-2xl font-extrabold text-emerald-600" id="stat-active-products">0</div>
+          <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+            <div class="text-slate-400 dark:text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Activos / En Stock</div>
+            <div class="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400" id="stat-active-products">0</div>
           </div>
-          <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
-            <div class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Categorías</div>
-            <div class="text-2xl font-extrabold text-slate-900" id="stat-total-categories">0</div>
+          <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+            <div class="text-slate-400 dark:text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Categorías</div>
+            <div class="text-2xl font-extrabold text-slate-900 dark:text-white" id="stat-total-categories">0</div>
           </div>
-          <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
-            <div class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Moneda Configurada</div>
-            <div class="text-2xl font-extrabold text-slate-900" id="stat-currency">S/</div>
+          <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs">
+            <div class="text-slate-400 dark:text-slate-500 text-xs font-bold uppercase tracking-wider mb-1">Moneda Configurada</div>
+            <div class="text-2xl font-extrabold text-slate-900 dark:text-white" id="stat-currency">S/</div>
           </div>
         </div>
 
         <!-- Products Table Container -->
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-xs overflow-hidden">
-          <div class="p-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-            <h3 class="font-bold text-slate-800 text-base">Inventario General</h3>
-            <input type="text" id="admin-search" oninput="renderAdminTable()" placeholder="Buscar en la tabla..." class="px-3 py-1.5 text-sm rounded-xl border border-slate-300 focus:ring-2 focus:ring-emerald-500 outline-none w-full sm:w-64">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden">
+          <div class="p-4 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <h3 class="font-bold text-slate-800 dark:text-slate-100 text-base">Inventario General</h3>
+            <input type="text" id="admin-search" oninput="renderAdminTable()" placeholder="Buscar en la tabla..." class="px-3.5 py-1.5 text-sm rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-emerald-500 outline-none w-full sm:w-64">
           </div>
 
           <div class="overflow-x-auto">
             <table class="w-full text-left text-sm border-collapse">
               <thead>
-                <tr class="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold text-xs uppercase tracking-wider">
+                <tr class="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 font-semibold text-xs uppercase tracking-wider">
                   <th class="py-3.5 px-4">Producto</th>
                   <th class="py-3.5 px-4">Categoría</th>
                   <th class="py-3.5 px-4">Precio</th>
@@ -308,7 +361,7 @@
                   <th class="py-3.5 px-4 text-right">Acciones</th>
                 </tr>
               </thead>
-              <tbody id="admin-products-tbody" class="divide-y divide-slate-100">
+              <tbody id="admin-products-tbody" class="divide-y divide-slate-100 dark:divide-slate-800">
                 <!-- Rendered via JS -->
               </tbody>
             </table>
@@ -318,21 +371,21 @@
 
       <!-- SECTION 2: CATEGORÍAS -->
       <div id="admin-sec-categories" class="hidden space-y-4">
-        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs max-w-xl">
-          <h3 class="font-bold text-slate-800 text-lg mb-3">Agregar Nueva Categoría</h3>
+        <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs max-w-xl">
+          <h3 class="font-bold text-slate-800 dark:text-white text-lg mb-3">Agregar Nueva Categoría</h3>
           <form onsubmit="handleAddCategory(event)" class="flex gap-2">
-            <input type="text" id="new-cat-name" required placeholder="Nombre de categoría (ej: Bebidas, Ropa)" class="flex-grow px-3.5 py-2 border border-slate-300 rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
+            <input type="text" id="new-cat-name" required placeholder="Nombre de categoría (ej: Bebidas, Ropa)" class="flex-grow px-3.5 py-2 border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl text-sm focus:ring-2 focus:ring-emerald-500 outline-none">
             <button type="submit" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-sm transition">
               <i class="fa-solid fa-plus mr-1"></i> Agregar
             </button>
           </form>
         </div>
 
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-xs max-w-xl overflow-hidden">
-          <div class="p-4 border-b border-slate-100 font-bold text-slate-800 text-base">
+        <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs max-w-xl overflow-hidden">
+          <div class="p-4 border-b border-slate-100 dark:border-slate-800 font-bold text-slate-800 dark:text-white text-base">
             Categorías Existentes
           </div>
-          <ul id="admin-categories-list" class="divide-y divide-slate-100">
+          <ul id="admin-categories-list" class="divide-y divide-slate-100 dark:divide-slate-800">
             <!-- Rendered via JS -->
           </ul>
         </div>
@@ -341,44 +394,44 @@
       <!-- SECTION 3: DESCARGAS & GUÍAS ADMIN -->
       <div id="admin-sec-downloads" class="hidden space-y-6">
         <!-- AGREGAR ENLACE DE DESCARGA -->
-        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs max-w-2xl space-y-4">
-          <h3 class="font-bold text-slate-800 text-lg flex items-center gap-2">
+        <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs max-w-2xl space-y-4">
+          <h3 class="font-bold text-slate-800 dark:text-white text-lg flex items-center gap-2">
             <i class="fa-solid fa-file-arrow-down text-emerald-600"></i> Agregar Enlace de Descarga
           </h3>
           <form onsubmit="handleAddDownloadResource(event)" class="space-y-3 text-sm">
-            <input type="text" id="dl-title" required placeholder="Título del archivo o programa (ej: Driver USB Pro)" class="w-full px-3.5 py-2 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500">
-            <input type="url" id="dl-url" required placeholder="URL de descarga (ej: Mega, Drive, Mediafire)" class="w-full px-3.5 py-2 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500">
-            <textarea id="dl-desc" rows="2" placeholder="Descripción opcional o requerimientos..." class="w-full px-3.5 py-2 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
+            <input type="text" id="dl-title" required placeholder="Título del archivo o programa (ej: Driver USB Pro)" class="w-full px-3.5 py-2 border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl outline-none focus:ring-2 focus:ring-emerald-500">
+            <input type="url" id="dl-url" required placeholder="URL de descarga (ej: Mega, Drive, Mediafire)" class="w-full px-3.5 py-2 border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl outline-none focus:ring-2 focus:ring-emerald-500">
+            <textarea id="dl-desc" rows="2" placeholder="Descripción opcional o requerimientos..." class="w-full px-3.5 py-2 border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
             <button type="submit" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition">
               <i class="fa-solid fa-plus mr-1"></i> Añadir Descarga
             </button>
           </form>
 
-          <div class="border-t border-slate-100 pt-3">
-            <h4 class="font-bold text-slate-700 text-sm mb-2">Recursos para Descarga Actuales:</h4>
-            <ul id="admin-downloads-list" class="divide-y divide-slate-100 text-sm">
+          <div class="border-t border-slate-100 dark:border-slate-800 pt-3">
+            <h4 class="font-bold text-slate-700 dark:text-slate-300 text-sm mb-2">Recursos para Descarga Actuales:</h4>
+            <ul id="admin-downloads-list" class="divide-y divide-slate-100 dark:divide-slate-800 text-sm">
               <!-- Rendered via JS -->
             </ul>
           </div>
         </div>
 
         <!-- AGREGAR GUÍA DE INSTALACIÓN (VIDEO) -->
-        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs max-w-2xl space-y-4">
-          <h3 class="font-bold text-slate-800 text-lg flex items-center gap-2">
+        <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs max-w-2xl space-y-4">
+          <h3 class="font-bold text-slate-800 dark:text-white text-lg flex items-center gap-2">
             <i class="fa-solid fa-video text-red-500"></i> Agregar Guía de Instalación (Video YouTube)
           </h3>
           <form onsubmit="handleAddGuide(event)" class="space-y-3 text-sm">
-            <input type="text" id="guide-title" required placeholder="Título del tutorial o guía" class="w-full px-3.5 py-2 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500">
-            <input type="url" id="guide-video" required placeholder="URL del Video de YouTube (ej: https://www.youtube.com/watch?v=...)" class="w-full px-3.5 py-2 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500">
-            <textarea id="guide-steps" rows="3" placeholder="Pasos o instrucciones resumidas para la instalación..." class="w-full px-3.5 py-2 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
+            <input type="text" id="guide-title" required placeholder="Título del tutorial o guía" class="w-full px-3.5 py-2 border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl outline-none focus:ring-2 focus:ring-emerald-500">
+            <input type="url" id="guide-video" required placeholder="URL del Video de YouTube (ej: https://www.youtube.com/watch?v=...)" class="w-full px-3.5 py-2 border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl outline-none focus:ring-2 focus:ring-emerald-500">
+            <textarea id="guide-steps" rows="3" placeholder="Pasos o instrucciones resumidas para la instalación..." class="w-full px-3.5 py-2 border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl outline-none focus:ring-2 focus:ring-emerald-500"></textarea>
             <button type="submit" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl transition">
               <i class="fa-solid fa-plus mr-1"></i> Añadir Guía
             </button>
           </form>
 
-          <div class="border-t border-slate-100 pt-3">
-            <h4 class="font-bold text-slate-700 text-sm mb-2">Guías en Video Actuales:</h4>
-            <ul id="admin-guides-list" class="divide-y divide-slate-100 text-sm">
+          <div class="border-t border-slate-100 dark:border-slate-800 pt-3">
+            <h4 class="font-bold text-slate-700 dark:text-slate-300 text-sm mb-2">Guías en Video Actuales:</h4>
+            <ul id="admin-guides-list" class="divide-y divide-slate-100 dark:divide-slate-800 text-sm">
               <!-- Rendered via JS -->
             </ul>
           </div>
@@ -387,91 +440,107 @@
 
       <!-- SECTION 4: MÉTODOS DE PAGO Y QRs -->
       <div id="admin-sec-payments" class="hidden space-y-4">
-        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs max-w-3xl">
-          <h3 class="font-bold text-slate-800 text-lg mb-2 flex items-center gap-2">
+        <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs max-w-3xl">
+          <h3 class="font-bold text-slate-800 dark:text-white text-lg mb-2 flex items-center gap-2">
             <i class="fa-solid fa-qrcode text-emerald-600"></i> Gestión de Cuentas y Códigos QR de Pago
           </h3>
-          <p class="text-xs text-slate-500 mb-6">Configura tus cuentas Yape, Plin, USDT y Worldcoin (WLD). Los clientes podrán ver los datos y escanear el QR al realizar su pedido.</p>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mb-6">Configura las cuentas Yape, Plin, USDT, Worldcoin, Transferencia Bancaria y Contraentrega. Los clientes podrán escanear los QR en el carrito.</p>
 
           <form onsubmit="savePaymentMethods(event)" class="space-y-6 text-sm">
             
             <!-- YAPE -->
-            <div class="p-4 rounded-2xl border border-slate-200 bg-slate-50 space-y-3">
+            <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 space-y-3">
               <div class="flex items-center justify-between">
-                <span class="font-extrabold text-purple-700 flex items-center gap-2 text-base">
+                <span class="font-extrabold text-purple-700 dark:text-purple-400 flex items-center gap-2 text-base">
                   <i class="fa-solid fa-mobile-screen"></i> Yape
                 </span>
-                <label class="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-700">
+                <label class="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-700 dark:text-slate-300">
                   <input type="checkbox" id="pay-yape-active" class="w-4 h-4 text-emerald-600 rounded"> Activar Yape
                 </label>
               </div>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <input type="text" id="pay-yape-num" placeholder="Número Yape (ej: 937 117 273)" class="px-3.5 py-2 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
-                <input type="text" id="pay-yape-name" placeholder="Titular de la cuenta" class="px-3.5 py-2 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
+                <input type="text" id="pay-yape-num" placeholder="Número Yape (ej: 937 117 273)" class="px-3.5 py-2 border border-slate-300 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white">
+                <input type="text" id="pay-yape-name" placeholder="Titular de la cuenta" class="px-3.5 py-2 border border-slate-300 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white">
               </div>
               <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">URL de Imagen QR Yape</label>
-                <input type="url" id="pay-yape-qr" placeholder="https://ejemplo.com/qr-yape.png" class="w-full px-3.5 py-2 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
+                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">URL de Imagen QR Yape</label>
+                <input type="url" id="pay-yape-qr" placeholder="https://ejemplo.com/qr-yape.png" class="w-full px-3.5 py-2 border border-slate-300 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white">
               </div>
             </div>
 
             <!-- PLIN -->
-            <div class="p-4 rounded-2xl border border-slate-200 bg-slate-50 space-y-3">
+            <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 space-y-3">
               <div class="flex items-center justify-between">
-                <span class="font-extrabold text-sky-600 flex items-center gap-2 text-base">
+                <span class="font-extrabold text-sky-600 dark:text-sky-400 flex items-center gap-2 text-base">
                   <i class="fa-solid fa-mobile-screen-button"></i> Plin
                 </span>
-                <label class="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-700">
+                <label class="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-700 dark:text-slate-300">
                   <input type="checkbox" id="pay-plin-active" class="w-4 h-4 text-emerald-600 rounded"> Activar Plin
                 </label>
               </div>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <input type="text" id="pay-plin-num" placeholder="Número Plin (ej: 937 117 273)" class="px-3.5 py-2 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
-                <input type="text" id="pay-plin-name" placeholder="Titular de la cuenta" class="px-3.5 py-2 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
+                <input type="text" id="pay-plin-num" placeholder="Número Plin (ej: 937 117 273)" class="px-3.5 py-2 border border-slate-300 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white">
+                <input type="text" id="pay-plin-name" placeholder="Titular de la cuenta" class="px-3.5 py-2 border border-slate-300 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white">
               </div>
               <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">URL de Imagen QR Plin</label>
-                <input type="url" id="pay-plin-qr" placeholder="https://ejemplo.com/qr-plin.png" class="w-full px-3.5 py-2 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
+                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">URL de Imagen QR Plin</label>
+                <input type="url" id="pay-plin-qr" placeholder="https://ejemplo.com/qr-plin.png" class="w-full px-3.5 py-2 border border-slate-300 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white">
+              </div>
+            </div>
+
+            <!-- BANK TRANSFER -->
+            <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="font-extrabold text-indigo-600 dark:text-indigo-400 flex items-center gap-2 text-base">
+                  <i class="fa-solid fa-building-columns"></i> Transferencia Bancaria
+                </span>
+                <label class="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-700 dark:text-slate-300">
+                  <input type="checkbox" id="pay-bank-active" class="w-4 h-4 text-emerald-600 rounded"> Activar Banco
+                </label>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <input type="text" id="pay-bank-name" placeholder="Banco (ej: BCP, Interbank)" class="px-3.5 py-2 border border-slate-300 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white">
+                <input type="text" id="pay-bank-acc" placeholder="N° Cuenta / CCI" class="px-3.5 py-2 border border-slate-300 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white">
               </div>
             </div>
 
             <!-- USDT / BINANCE -->
-            <div class="p-4 rounded-2xl border border-slate-200 bg-slate-50 space-y-3">
+            <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 space-y-3">
               <div class="flex items-center justify-between">
-                <span class="font-extrabold text-amber-600 flex items-center gap-2 text-base">
+                <span class="font-extrabold text-amber-600 dark:text-amber-400 flex items-center gap-2 text-base">
                   <i class="fa-brands fa-bitcoin"></i> USDT / Binance Pay
                 </span>
-                <label class="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-700">
+                <label class="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-700 dark:text-slate-300">
                   <input type="checkbox" id="pay-usdt-active" class="w-4 h-4 text-emerald-600 rounded"> Activar USDT
                 </label>
               </div>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <input type="text" id="pay-usdt-wallet" placeholder="Dirección de Wallet o Binance Pay ID" class="px-3.5 py-2 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
-                <input type="text" id="pay-usdt-network" placeholder="Red (ej: TRC20, BEP20, Binance Pay)" class="px-3.5 py-2 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
+                <input type="text" id="pay-usdt-wallet" placeholder="Dirección Wallet o Binance Pay ID" class="px-3.5 py-2 border border-slate-300 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white">
+                <input type="text" id="pay-usdt-network" placeholder="Red (ej: TRC20, BEP20)" class="px-3.5 py-2 border border-slate-300 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white">
               </div>
               <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">URL de Imagen QR USDT / Binance</label>
-                <input type="url" id="pay-usdt-qr" placeholder="https://ejemplo.com/qr-binance.png" class="w-full px-3.5 py-2 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
+                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">URL de Imagen QR USDT</label>
+                <input type="url" id="pay-usdt-qr" placeholder="https://ejemplo.com/qr-binance.png" class="w-full px-3.5 py-2 border border-slate-300 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white">
               </div>
             </div>
 
             <!-- WORLDCOIN (WLD) -->
-            <div class="p-4 rounded-2xl border border-slate-200 bg-slate-50 space-y-3">
+            <div class="p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 space-y-3">
               <div class="flex items-center justify-between">
-                <span class="font-extrabold text-slate-900 flex items-center gap-2 text-base">
-                  <i class="fa-solid fa-earth-americas"></i> Worldcoin (WLD)
+                <span class="font-extrabold text-slate-900 dark:text-white flex items-center gap-2 text-base">
+                  <i class="fa-solid fa-globe"></i> Worldcoin (WLD)
                 </span>
-                <label class="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-700">
+                <label class="flex items-center gap-2 cursor-pointer text-xs font-bold text-slate-700 dark:text-slate-300">
                   <input type="checkbox" id="pay-worldcoin-active" class="w-4 h-4 text-emerald-600 rounded"> Activar Worldcoin
                 </label>
               </div>
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <input type="text" id="pay-worldcoin-wallet" placeholder="Dirección de Wallet Worldcoin / Username" class="px-3.5 py-2 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
-                <input type="text" id="pay-worldcoin-network" placeholder="Red / App (ej: Optimism / World App)" class="px-3.5 py-2 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
+                <input type="text" id="pay-worldcoin-wallet" placeholder="Dirección Wallet / Username" class="px-3.5 py-2 border border-slate-300 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white">
+                <input type="text" id="pay-worldcoin-network" placeholder="Red / App (ej: Optimism)" class="px-3.5 py-2 border border-slate-300 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white">
               </div>
               <div>
-                <label class="block text-xs font-semibold text-slate-600 mb-1">URL de Imagen QR Worldcoin</label>
-                <input type="url" id="pay-worldcoin-qr" placeholder="https://ejemplo.com/qr-worldcoin.png" class="w-full px-3.5 py-2 border border-slate-300 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 bg-white">
+                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-400 mb-1">URL de Imagen QR Worldcoin</label>
+                <input type="url" id="pay-worldcoin-qr" placeholder="https://ejemplo.com/qr-worldcoin.png" class="w-full px-3.5 py-2 border border-slate-300 dark:border-slate-700 rounded-xl outline-none focus:ring-2 focus:ring-emerald-500 bg-white dark:bg-slate-800 text-slate-900 dark:text-white">
               </div>
             </div>
 
@@ -486,36 +555,36 @@
 
       <!-- SECTION 5: CONFIGURACIÓN TIENDA -->
       <div id="admin-sec-config" class="hidden space-y-4">
-        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs max-w-2xl">
-          <h3 class="font-bold text-slate-800 text-lg mb-4 flex items-center gap-2">
+        <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs max-w-2xl">
+          <h3 class="font-bold text-slate-800 dark:text-white text-lg mb-4 flex items-center gap-2">
             <i class="fa-solid fa-store text-emerald-600"></i> Datos Generales del Negocio
           </h3>
           
           <form onsubmit="saveStoreConfig(event)" class="space-y-4 text-sm">
             <div>
-              <label class="block font-medium text-slate-700 mb-1">Nombre de la Tienda</label>
-              <input type="text" id="cfg-name" required class="w-full px-3.5 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+              <label class="block font-medium text-slate-700 dark:text-slate-300 mb-1">Nombre de la Tienda</label>
+              <input type="text" id="cfg-name" required class="w-full px-3.5 py-2 border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
             </div>
 
             <div>
-              <label class="block font-medium text-slate-700 mb-1">Eslogan / Subtítulo</label>
-              <input type="text" id="cfg-slogan" required class="w-full px-3.5 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+              <label class="block font-medium text-slate-700 dark:text-slate-300 mb-1">Eslogan / Subtítulo</label>
+              <input type="text" id="cfg-slogan" required class="w-full px-3.5 py-2 border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label class="block font-medium text-slate-700 mb-1">WhatsApp (con código de país, sin +)</label>
-                <input type="text" id="cfg-phone" required placeholder="51937117273" class="w-full px-3.5 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+                <label class="block font-medium text-slate-700 dark:text-slate-300 mb-1">WhatsApp (con código de país, sin +)</label>
+                <input type="text" id="cfg-phone" required placeholder="51937117273" class="w-full px-3.5 py-2 border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
               </div>
               <div>
-                <label class="block font-medium text-slate-700 mb-1">Símbolo de Moneda</label>
-                <input type="text" id="cfg-currency" required placeholder="S/ o $" class="w-full px-3.5 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+                <label class="block font-medium text-slate-700 dark:text-slate-300 mb-1">Símbolo de Moneda</label>
+                <input type="text" id="cfg-currency" required placeholder="S/ o $" class="w-full px-3.5 py-2 border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
               </div>
             </div>
 
             <div>
-              <label class="block font-medium text-slate-700 mb-1">URL / Enlace de la Imagen del Logo</label>
-              <input type="url" id="cfg-logo" required placeholder="https://..." class="w-full px-3.5 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+              <label class="block font-medium text-slate-700 dark:text-slate-300 mb-1">URL de la Imagen del Logo</label>
+              <input type="url" id="cfg-logo" required placeholder="https://..." class="w-full px-3.5 py-2 border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
             </div>
 
             <div class="pt-2">
@@ -529,21 +598,21 @@
 
       <!-- SECTION 6: SEGURIDAD -->
       <div id="admin-sec-security" class="hidden space-y-4">
-        <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-xs max-w-lg">
-          <h3 class="font-bold text-slate-800 text-lg mb-2 flex items-center gap-2">
+        <div class="bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs max-w-lg">
+          <h3 class="font-bold text-slate-800 dark:text-white text-lg mb-2 flex items-center gap-2">
             <i class="fa-solid fa-key text-emerald-600"></i> Cambiar Credenciales de Acceso
           </h3>
-          <p class="text-xs text-slate-500 mb-4">Actualiza el usuario y contraseña para ingresar al Panel Administrador.</p>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Actualiza el usuario y contraseña para ingresar al Panel Administrador.</p>
 
           <form onsubmit="saveSecurityCredentials(event)" class="space-y-4 text-sm">
             <div>
-              <label class="block font-medium text-slate-700 mb-1">Nuevo Usuario Administrador</label>
-              <input type="text" id="sec-user" required class="w-full px-3.5 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+              <label class="block font-medium text-slate-700 dark:text-slate-300 mb-1">Nuevo Usuario Administrador</label>
+              <input type="text" id="sec-user" required class="w-full px-3.5 py-2 border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
             </div>
 
             <div>
-              <label class="block font-medium text-slate-700 mb-1">Nueva Contraseña</label>
-              <input type="password" id="sec-pass" required minlength="6" class="w-full px-3.5 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+              <label class="block font-medium text-slate-700 dark:text-slate-300 mb-1">Nueva Contraseña</label>
+              <input type="password" id="sec-pass" required minlength="6" class="w-full px-3.5 py-2 border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
             </div>
 
             <div class="pt-2">
@@ -564,7 +633,7 @@
   <div id="floating-cart-btn" onclick="openCartModal()" class="fixed bottom-6 right-6 bg-brand-whatsapp hover:bg-emerald-600 text-white p-3.5 sm:px-5 sm:py-3.5 rounded-full shadow-2xl cursor-pointer flex items-center space-x-3 z-40 transition-transform active:scale-95 group">
     <div class="relative">
       <i class="fa-solid fa-cart-shopping text-xl"></i>
-      <span id="cart-badge-count" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-extrabold w-5 h-5 rounded-full flex items-center justify-center border-2 border-white">0</span>
+      <span id="cart-badge-count" class="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-extrabold w-5 h-5 rounded-full flex items-center justify-center border-2 border-white dark:border-slate-900">0</span>
     </div>
     <span class="font-bold text-sm hidden sm:inline">Ver Pedido</span>
     <span id="cart-badge-total" class="font-extrabold text-sm bg-black/20 px-2 py-1 rounded-md ml-1">S/ 0.00</span>
@@ -573,15 +642,15 @@
 
   <!-- SHOPPING CART MODAL -->
   <div id="modal-cart" class="fixed inset-0 z-50 hidden modal-backdrop flex justify-end">
-    <div class="bg-white w-full max-w-md h-full shadow-2xl flex flex-col transform transition-transform duration-300 overflow-y-auto">
+    <div class="bg-white dark:bg-slate-900 w-full max-w-md h-full shadow-2xl flex flex-col transform transition-transform duration-300 overflow-y-auto">
       
       <!-- Cart Header -->
-      <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50 sticky top-0 z-10">
+      <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50 sticky top-0 z-10">
         <div class="flex items-center space-x-2">
-          <i class="fa-solid fa-basket-shopping text-brand-600 text-xl"></i>
-          <h3 class="font-bold text-slate-800 text-lg">Tu Pedido</h3>
+          <i class="fa-solid fa-basket-shopping text-brand-600 dark:text-brand-500 text-xl"></i>
+          <h3 class="font-bold text-slate-800 dark:text-white text-lg">Tu Pedido</h3>
         </div>
-        <button onclick="closeCartModal()" class="w-8 h-8 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-600 flex items-center justify-center transition">
+        <button onclick="closeCartModal()" class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 text-slate-600 dark:text-slate-300 flex items-center justify-center transition">
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
@@ -592,8 +661,8 @@
       </div>
 
       <!-- Payment Method Selection -->
-      <div class="px-4 py-3 bg-slate-50 border-t border-slate-200 space-y-3">
-        <h4 class="font-bold text-slate-800 text-xs uppercase tracking-wider flex items-center gap-1.5">
+      <div class="px-4 py-3 bg-slate-50 dark:bg-slate-800/30 border-t border-slate-200 dark:border-slate-800 space-y-3">
+        <h4 class="font-bold text-slate-800 dark:text-white text-xs uppercase tracking-wider flex items-center gap-1.5">
           <i class="fa-solid fa-credit-card text-emerald-600"></i> Selecciona Método de Pago
         </h4>
         <div id="payment-options-container" class="grid grid-cols-2 gap-2 text-xs">
@@ -601,22 +670,22 @@
         </div>
 
         <!-- Dynamic QR Preview Box -->
-        <div id="qr-preview-box" class="hidden p-3 bg-white border border-slate-200 rounded-2xl text-center space-y-2">
-          <p id="qr-info-title" class="font-bold text-xs text-slate-800"></p>
-          <p id="qr-info-detail" class="text-xs text-emerald-700 font-bold bg-emerald-50 py-1 px-2 rounded-lg break-all"></p>
-          <img id="qr-info-img" src="" alt="Código QR" class="w-40 h-40 mx-auto object-contain border border-slate-100 rounded-xl">
-          <p class="text-[10px] text-slate-400">Escanea el QR para realizar tu pago antes de finalizar el pedido.</p>
+        <div id="qr-preview-box" class="hidden p-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl text-center space-y-2">
+          <p id="qr-info-title" class="font-bold text-xs text-slate-800 dark:text-white"></p>
+          <p id="qr-info-detail" class="text-xs text-emerald-700 dark:text-emerald-400 font-bold bg-emerald-50 dark:bg-emerald-950/50 py-1 px-2 rounded-lg break-all"></p>
+          <img id="qr-info-img" src="" alt="Código QR" class="w-40 h-40 mx-auto object-contain border border-slate-100 dark:border-slate-700 rounded-xl" onerror="this.src='https://placehold.co/200x200/10b981/ffffff?text=QR+No+Disponible'">
+          <p class="text-[10px] text-slate-400">Escanea el QR o realiza la transferencia antes de enviar el pedido.</p>
         </div>
       </div>
 
       <!-- Cart Footer -->
-      <div class="p-4 border-t border-slate-200 bg-slate-50 space-y-3 sticky bottom-0">
-        <div class="flex justify-between items-center font-bold text-slate-800 text-lg">
+      <div class="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 space-y-3 sticky bottom-0">
+        <div class="flex justify-between items-center font-bold text-slate-800 dark:text-white text-lg">
           <span>Total Estimado:</span>
-          <span id="cart-modal-total" class="text-brand-600 font-extrabold">S/ 0.00</span>
+          <span id="cart-modal-total" class="text-brand-600 dark:text-brand-400 font-extrabold">S/ 0.00</span>
         </div>
 
-        <button onclick="sendOrderToWhatsApp()" class="w-full bg-brand-whatsapp hover:bg-emerald-600 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg shadow-emerald-200 flex items-center justify-center space-x-2 transition text-sm">
+        <button onclick="sendOrderToWhatsApp()" class="w-full bg-brand-whatsapp hover:bg-emerald-600 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg shadow-emerald-200 dark:shadow-none flex items-center justify-center space-x-2 transition text-sm">
           <i class="fa-brands fa-whatsapp text-2xl"></i>
           <span>Enviar Pedido a WhatsApp</span>
         </button>
@@ -628,12 +697,12 @@
 
   <!-- MODAL: DETALLES DEL PRODUCTO -->
   <div id="modal-product-detail" class="fixed inset-0 z-50 hidden modal-backdrop flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-100 flex flex-col max-h-[90vh]">
+    <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-100 dark:border-slate-800 flex flex-col max-h-[90vh]">
       
       <!-- Modal Header / Image Container -->
-      <div class="relative bg-slate-100">
-        <img id="detail-img" src="" alt="Producto" class="w-full h-64 object-cover">
-        <button onclick="closeDetailModal()" class="absolute top-3 right-3 w-9 h-9 rounded-full bg-white/80 hover:bg-white text-slate-700 backdrop-blur-sm flex items-center justify-center shadow-md transition">
+      <div class="relative bg-slate-100 dark:bg-slate-800">
+        <img id="detail-img" src="" alt="Producto" class="w-full h-64 object-cover" onerror="this.src='https://placehold.co/600x400/10b981/ffffff?text=Sin+Imagen'">
+        <button onclick="closeDetailModal()" class="absolute top-3 right-3 w-9 h-9 rounded-full bg-white/80 dark:bg-slate-900/80 hover:bg-white text-slate-700 dark:text-slate-200 backdrop-blur-sm flex items-center justify-center shadow-md transition">
           <i class="fa-solid fa-xmark text-lg"></i>
         </button>
         <span id="detail-category" class="absolute bottom-3 left-3 bg-slate-900/80 backdrop-blur-sm text-white text-xs font-semibold px-3 py-1 rounded-full">
@@ -644,24 +713,24 @@
       <!-- Modal Body -->
       <div class="p-6 overflow-y-auto space-y-4">
         <div>
-          <h3 id="detail-title" class="text-2xl font-extrabold text-slate-900 leading-tight">Nombre del Producto</h3>
-          <p id="detail-price" class="text-2xl font-extrabold text-emerald-600 mt-1">S/ 0.00</p>
+          <h3 id="detail-title" class="text-2xl font-extrabold text-slate-900 dark:text-white leading-tight">Nombre del Producto</h3>
+          <p id="detail-price" class="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-1">S/ 0.00</p>
         </div>
 
         <div>
           <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Descripción</h4>
-          <p id="detail-desc" class="text-slate-600 text-sm leading-relaxed whitespace-pre-line">Descripción completa del producto.</p>
+          <p id="detail-desc" class="text-slate-600 dark:text-slate-300 text-sm leading-relaxed whitespace-pre-line">Descripción completa del producto.</p>
         </div>
 
         <!-- Quantity Selector & Add Action -->
-        <div class="pt-4 border-t border-slate-100 flex items-center gap-3">
-          <div class="flex items-center border border-slate-300 rounded-xl overflow-hidden bg-slate-50">
-            <button onclick="adjustDetailQty(-1)" class="px-3 py-2 text-slate-600 hover:bg-slate-200 transition font-bold">-</button>
-            <span id="detail-qty" class="px-4 py-2 text-sm font-bold text-slate-800">1</span>
-            <button onclick="adjustDetailQty(1)" class="px-3 py-2 text-slate-600 hover:bg-slate-200 transition font-bold">+</button>
+        <div class="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center gap-3">
+          <div class="flex items-center border border-slate-300 dark:border-slate-700 rounded-xl overflow-hidden bg-slate-50 dark:bg-slate-800">
+            <button onclick="adjustDetailQty(-1)" class="px-3 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition font-bold">-</button>
+            <span id="detail-qty" class="px-4 py-2 text-sm font-bold text-slate-800 dark:text-white">1</span>
+            <button onclick="adjustDetailQty(1)" class="px-3 py-2 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition font-bold">+</button>
           </div>
 
-          <button id="detail-add-btn" onclick="addCurrentDetailToCart()" class="flex-grow py-3 px-4 bg-brand-whatsapp hover:bg-emerald-600 text-white font-bold rounded-xl shadow-lg shadow-emerald-200 transition flex items-center justify-center space-x-2 text-sm">
+          <button id="detail-add-btn" onclick="addCurrentDetailToCart()" class="flex-grow py-3 px-4 bg-brand-whatsapp hover:bg-emerald-600 text-white font-bold rounded-xl shadow-lg shadow-emerald-200 dark:shadow-none transition flex items-center justify-center space-x-2 text-sm">
             <i class="fa-solid fa-cart-plus"></i>
             <span>Agregar al Carrito</span>
           </button>
@@ -674,51 +743,51 @@
 
   <!-- MODAL: CREAR / EDITAR PRODUCTO (ADMIN) -->
   <div id="modal-product" class="fixed inset-0 z-50 hidden modal-backdrop flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-100 flex flex-col max-h-[90vh]">
+    <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full overflow-hidden shadow-2xl border border-slate-100 dark:border-slate-800 flex flex-col max-h-[90vh]">
       
-      <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
-        <h3 class="font-bold text-slate-800 text-base" id="product-modal-title">Agregar Producto</h3>
-        <button onclick="closeProductModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+      <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center bg-slate-50 dark:bg-slate-800/50">
+        <h3 class="font-bold text-slate-800 dark:text-white text-base" id="product-modal-title">Agregar Producto</h3>
+        <button onclick="closeProductModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"><i class="fa-solid fa-xmark text-lg"></i></button>
       </div>
 
       <form id="form-product" onsubmit="saveProduct(event)" class="p-5 overflow-y-auto space-y-4 text-sm">
         <input type="hidden" id="prod-id">
 
         <div>
-          <label class="block font-medium text-slate-700 mb-1">Nombre del Producto *</label>
-          <input type="text" id="prod-name" required placeholder="Ej: Zapatillas Deportivas" class="w-full px-3.5 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+          <label class="block font-medium text-slate-700 dark:text-slate-300 mb-1">Nombre del Producto *</label>
+          <input type="text" id="prod-name" required placeholder="Ej: Zapatillas Deportivas" class="w-full px-3.5 py-2 border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
         </div>
 
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block font-medium text-slate-700 mb-1">Precio *</label>
-            <input type="number" step="0.01" id="prod-price" required placeholder="0.00" class="w-full px-3.5 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+            <label class="block font-medium text-slate-700 dark:text-slate-300 mb-1">Precio *</label>
+            <input type="number" step="0.01" id="prod-price" required placeholder="0.00" class="w-full px-3.5 py-2 border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
           </div>
           <div>
-            <label class="block font-medium text-slate-700 mb-1">Categoría</label>
-            <select id="prod-category" class="w-full px-3.5 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none bg-white">
+            <label class="block font-medium text-slate-700 dark:text-slate-300 mb-1">Categoría</label>
+            <select id="prod-category" class="w-full px-3.5 py-2 border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
               <!-- Rendered via JS -->
             </select>
           </div>
         </div>
 
         <div>
-          <label class="block font-medium text-slate-700 mb-1">URL de Imagen</label>
-          <input type="url" id="prod-img" placeholder="https://ejemplo.com/imagen.jpg" class="w-full px-3.5 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
+          <label class="block font-medium text-slate-700 dark:text-slate-300 mb-1">URL de Imagen</label>
+          <input type="url" id="prod-img" placeholder="https://ejemplo.com/imagen.jpg" class="w-full px-3.5 py-2 border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none">
         </div>
 
         <div>
-          <label class="block font-medium text-slate-700 mb-1">Descripción</label>
-          <textarea id="prod-desc" rows="2" placeholder="Detalles o especificaciones clave..." class="w-full px-3.5 py-2 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"></textarea>
+          <label class="block font-medium text-slate-700 dark:text-slate-300 mb-1">Descripción</label>
+          <textarea id="prod-desc" rows="2" placeholder="Detalles o especificaciones clave..." class="w-full px-3.5 py-2 border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-900 dark:text-white rounded-xl focus:ring-2 focus:ring-emerald-500 outline-none"></textarea>
         </div>
 
         <div class="flex items-center space-x-2 pt-1">
           <input type="checkbox" id="prod-active" checked class="w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500">
-          <label for="prod-active" class="font-medium text-slate-700">Disponible / Activo en Catálogo</label>
+          <label for="prod-active" class="font-medium text-slate-700 dark:text-slate-300">Disponible / Activo en Catálogo</label>
         </div>
 
-        <div class="pt-4 flex justify-end space-x-2 border-t border-slate-100">
-          <button type="button" onclick="closeProductModal()" class="px-4 py-2 border border-slate-300 text-slate-700 rounded-xl hover:bg-slate-50 transition">Cancelar</button>
+        <div class="pt-4 flex justify-end space-x-2 border-t border-slate-100 dark:border-slate-800">
+          <button type="button" onclick="closeProductModal()" class="px-4 py-2 border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800 transition">Cancelar</button>
           <button type="submit" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-md transition">Guardar</button>
         </div>
       </form>
@@ -727,50 +796,55 @@
   </div>
 
 
+  <!-- TOAST CONTAINER FOR NOTIFICATIONS -->
+  <div id="toast-container" class="fixed top-20 right-5 z-50 space-y-2 pointer-events-none"></div>
+
+
   <!-- ==================== LOGICA JAVASCRIPT COMPLETA ==================== -->
   <script>
-    // Initial Credentials
+    // Initial Fallback Credentials & Store Settings
     const INITIAL_CREDENTIALS = {
       user: 'Akitodo',
       pass: 'Catalogo@2027'
     };
 
-    const LOGO_URL = 'https://drive.google.com/uc?export=view&id=1RSL1FUQhQdmvSjLktYCtTE3ZgT8DkSMD';
+    const LOGO_URL = 'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?auto=format&fit=crop&w=200&q=80';
 
     const INITIAL_CONFIG = {
       name: 'Akitodo Service',
-      slogan: 'Catálogo digital',
+      slogan: 'Catálogo digital interactivo',
       phone: '51937117273',
       currency: 'S/',
       logo: LOGO_URL
     };
 
     const INITIAL_PAYMENTS = {
-      yape: { active: true, number: '51937117273', name: 'Akitodo Service', qr: '' },
-      plin: { active: true, number: '51937117273', name: 'Akitodo Service', qr: '' },
-      usdt: { active: true, wallet: 'Binance Pay ID / Wallet TRC20', network: 'TRC20 / Binance Pay', qr: '' },
-      worldcoin: { active: true, wallet: 'Dirección o Username Worldcoin', network: 'Optimism / World App', qr: '' }
+      yape: { active: true, number: '937 117 273', name: 'Akitodo Service', qr: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=300&q=80' },
+      plin: { active: true, number: '937 117 273', name: 'Akitodo Service', qr: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=300&q=80' },
+      bank: { active: true, name: 'BCP', acc: '191-98765432-0-12 (CCI: 0021910098765432012)' },
+      usdt: { active: true, wallet: '0x71C7656EC7ab88b098defB751B7401B5f6d8976F', network: 'TRC20 / Binance Pay', qr: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=300&q=80' },
+      worldcoin: { active: true, wallet: '0x99238423984923849', network: 'Optimism / World App', qr: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=300&q=80' }
     };
 
     const INITIAL_DOWNLOADS = [
-      { id: 'd1', title: 'Driver USB Multiuso v2.1', url: 'https://drive.google.com', desc: 'Driver indispensable para la conexión de dispositivos.' },
-      { id: 'd2', title: 'Guía Rápida en PDF', url: 'https://drive.google.com', desc: 'Manual en formato PDF para la configuración inicial.' }
+      { id: 'd1', title: 'Driver USB Multiuso v2.1', url: 'https://drive.google.com', desc: 'Driver indispensable para la conexión rápida de dispositivos.' },
+      { id: 'd2', title: 'Guía Rápida en PDF', url: 'https://drive.google.com', desc: 'Manual oficial en PDF para la configuración inicial y preguntas frecuentes.' }
     ];
 
     const INITIAL_GUIDES = [
-      { id: 'g1', title: 'Cómo instalar y configurar el software', video: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', steps: '1. Descarga el archivo ejecutable.\n2. Inicia como Administrador.\n3. Reinicia tu equipo para completar el proceso.' }
+      { id: 'g1', title: 'Cómo instalar y configurar el sistema', video: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ', steps: '1. Descarga el archivo de instalación.\n2. Inicia el instalador como Administrador.\n3. Reinicia tu equipo para completar.' }
     ];
 
     const INITIAL_CATEGORIES = ['Ropa', 'Calzado', 'Accesorios', 'Electrónica'];
 
     const INITIAL_PRODUCTS = [
-      { id: 'p1', name: 'Zapatillas Urbanas', price: 129.90, category: 'Calzado', img: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=500&q=80', desc: 'Suela amortiguada y diseño ergonómico ideal para uso diario.', active: true },
-      { id: 'p2', name: 'Hoodie Oversize Negro', price: 89.00, category: 'Ropa', img: 'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=500&q=80', desc: '100% Algodón de alta densidad, cómodo y suave.', active: true },
-      { id: 'p3', name: 'Reloj Smartwatch Pro', price: 199.50, category: 'Electrónica', img: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=500&q=80', desc: 'Monitoreo de salud, llamadas Bluetooth y batería de hasta 7 días.', active: true },
-      { id: 'p4', name: 'Mochila Impermeable', price: 75.00, category: 'Accesorios', img: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=500&q=80', desc: 'Resistente al agua, compartimento acolchado para laptops de hasta 15 pulgadas.', active: true }
+      { id: 'p1', name: 'Zapatillas Urbanas Pro', price: 129.90, category: 'Calzado', img: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=600&q=80', desc: 'Suela de alta durabilidad con amortiguación premium, ideal para el uso continuo.', active: true },
+      { id: 'p2', name: 'Hoodie Oversize Negro', price: 89.00, category: 'Ropa', img: 'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?auto=format&fit=crop&w=600&q=80', desc: 'Confeccionado en 100% Algodón Reactivo con acabados reforzados.', active: true },
+      { id: 'p3', name: 'Smartwatch Sport V8', price: 199.50, category: 'Electrónica', img: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=600&q=80', desc: 'Pantalla AMOLED táctil, monitor de ritmo cardíaco, resistencia al agua IP68.', active: true },
+      { id: 'p4', name: 'Mochila Impermeable Tech', price: 75.00, category: 'Accesorios', img: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=600&q=80', desc: 'Compartimento reforzado para Laptop de 15.6 pulgadas con puerto USB externo.', active: true }
     ];
 
-    // State Variables
+    // App State
     let credentials = JSON.parse(localStorage.getItem('Akitodo_credentials')) || INITIAL_CREDENTIALS;
     let config = JSON.parse(localStorage.getItem('Akitodo_config')) || INITIAL_CONFIG;
     let paymentMethods = JSON.parse(localStorage.getItem('Akitodo_payments')) || INITIAL_PAYMENTS;
@@ -780,18 +854,18 @@
     let products = JSON.parse(localStorage.getItem('Akitodo_products')) || INITIAL_PRODUCTS;
     let cart = JSON.parse(localStorage.getItem('Akitodo_cart')) || [];
     let isAdminLoggedIn = JSON.parse(sessionStorage.getItem('Akitodo_admin_session')) || false;
-    
+    let currentTheme = localStorage.getItem('Akitodo_theme') || 'light';
+
     let currentPublicSec = 'catalog';
     let selectedCategory = 'Todas';
     let selectedPaymentMethod = 'whatsapp';
     let currentDetailProduct = null;
     let currentDetailQty = 1;
+    let layoutMode = 'grid'; // 'grid' | 'list'
 
     // Initialization
     window.onload = function() {
-      if(!config.logo) config.logo = LOGO_URL;
-      if(!paymentMethods.worldcoin) paymentMethods.worldcoin = INITIAL_PAYMENTS.worldcoin;
-      
+      initTheme();
       saveAllState();
       applyConfigUI();
       renderCategoryPills();
@@ -800,6 +874,33 @@
       renderGuides();
       updateCartUI();
     };
+
+    // Dark Mode Toggle
+    function initTheme() {
+      if (currentTheme === 'dark' || (!('Akitodo_theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+        document.documentElement.classList.add('dark');
+        document.getElementById('theme-icon-sun').classList.remove('hidden');
+        document.getElementById('theme-icon-moon').classList.add('hidden');
+      } else {
+        document.documentElement.classList.remove('dark');
+        document.getElementById('theme-icon-sun').classList.add('hidden');
+        document.getElementById('theme-icon-moon').classList.remove('hidden');
+      }
+    }
+
+    function toggleDarkMode() {
+      if (document.documentElement.classList.contains('dark')) {
+        document.documentElement.classList.remove('dark');
+        localStorage.setItem('Akitodo_theme', 'light');
+        document.getElementById('theme-icon-sun').classList.add('hidden');
+        document.getElementById('theme-icon-moon').classList.remove('hidden');
+      } else {
+        document.documentElement.classList.add('dark');
+        localStorage.setItem('Akitodo_theme', 'dark');
+        document.getElementById('theme-icon-sun').classList.remove('hidden');
+        document.getElementById('theme-icon-moon').classList.add('hidden');
+      }
+    }
 
     function saveAllState() {
       localStorage.setItem('Akitodo_credentials', JSON.stringify(credentials));
@@ -821,15 +922,19 @@
       const secGuid = document.getElementById('public-sec-guides');
       const catPills = document.getElementById('category-pills');
       const searchContainer = document.getElementById('search-bar-container');
+      const catalogControls = document.getElementById('catalog-controls');
 
       const btnProd = document.getElementById('pub-tab-products');
       const btnDown = document.getElementById('pub-tab-downloads');
       const btnGuid = document.getElementById('pub-tab-guides');
 
-      // Reset Active Classes
-      btnProd.className = "px-4 py-2 font-semibold text-sm bg-white text-slate-600 hover:bg-slate-200 border border-slate-200 rounded-xl transition flex items-center gap-2 whitespace-nowrap";
-      btnDown.className = "px-4 py-2 font-semibold text-sm bg-white text-slate-600 hover:bg-slate-200 border border-slate-200 rounded-xl transition flex items-center gap-2 whitespace-nowrap";
-      btnGuid.className = "px-4 py-2 font-semibold text-sm bg-white text-slate-600 hover:bg-slate-200 border border-slate-200 rounded-xl transition flex items-center gap-2 whitespace-nowrap";
+      // Reset Active Button Styles
+      const defaultBtn = "px-4 py-2 font-semibold text-sm bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 rounded-xl transition flex items-center gap-2 whitespace-nowrap";
+      btnProd.className = defaultBtn;
+      btnDown.className = defaultBtn;
+      btnGuid.className = defaultBtn;
+
+      const activeBtn = "px-4 py-2 font-bold text-sm bg-slate-900 dark:bg-emerald-600 text-white rounded-xl shadow-xs transition flex items-center gap-2 whitespace-nowrap";
 
       if (sec === 'catalog') {
         secProd.classList.remove('hidden');
@@ -837,14 +942,16 @@
         secGuid.classList.add('hidden');
         catPills.classList.remove('hidden');
         searchContainer.classList.remove('hidden');
-        btnProd.className = "px-4 py-2 font-bold text-sm bg-slate-900 text-white rounded-xl shadow-xs transition flex items-center gap-2 whitespace-nowrap";
+        catalogControls.classList.remove('hidden');
+        btnProd.className = activeBtn;
       } else if (sec === 'downloads') {
         secProd.classList.add('hidden');
         secDown.classList.remove('hidden');
         secGuid.classList.add('hidden');
         catPills.classList.add('hidden');
         searchContainer.classList.add('hidden');
-        btnDown.className = "px-4 py-2 font-bold text-sm bg-slate-900 text-white rounded-xl shadow-xs transition flex items-center gap-2 whitespace-nowrap";
+        catalogControls.classList.add('hidden');
+        btnDown.className = activeBtn;
         renderDownloads();
       } else if (sec === 'guides') {
         secProd.classList.add('hidden');
@@ -852,12 +959,29 @@
         secGuid.classList.remove('hidden');
         catPills.classList.add('hidden');
         searchContainer.classList.add('hidden');
-        btnGuid.className = "px-4 py-2 font-bold text-sm bg-slate-900 text-white rounded-xl shadow-xs transition flex items-center gap-2 whitespace-nowrap";
+        catalogControls.classList.add('hidden');
+        btnGuid.className = activeBtn;
         renderGuides();
       }
     }
 
-    // Navigation Tabs Main (Catalog / Admin)
+    // Grid / List Layout Switcher
+    function setLayout(mode) {
+      layoutMode = mode;
+      const btnGrid = document.getElementById('btn-layout-grid');
+      const btnList = document.getElementById('btn-layout-list');
+
+      if (mode === 'grid') {
+        btnGrid.className = "p-1.5 rounded-lg text-brand-600 dark:text-brand-500 bg-slate-100 dark:bg-slate-800 transition";
+        btnList.className = "p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition";
+      } else {
+        btnList.className = "p-1.5 rounded-lg text-brand-600 dark:text-brand-500 bg-slate-100 dark:bg-slate-800 transition";
+        btnGrid.className = "p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition";
+      }
+      filterCatalog();
+    }
+
+    // Main Tabs Switcher (Catalog / Admin)
     function switchTab(tab) {
       const vCatalog = document.getElementById('view-catalog');
       const vLogin = document.getElementById('view-login');
@@ -874,12 +998,12 @@
         vAdmin.classList.add('hidden');
         floatCart.classList.remove('hidden');
 
-        btnCatalog.className = "flex items-center space-x-2 px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all shadow-sm bg-white text-slate-900";
-        btnAdmin.className = "flex items-center space-x-2 px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 transition-all";
+        btnCatalog.className = "flex items-center space-x-2 px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all shadow-xs bg-white dark:bg-slate-900 text-slate-900 dark:text-white";
+        btnAdmin.className = "flex items-center space-x-2 px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all";
       } else {
         floatCart.classList.add('hidden');
-        btnAdmin.className = "flex items-center space-x-2 px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all shadow-sm bg-white text-slate-900";
-        btnCatalog.className = "flex items-center space-x-2 px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-600 hover:text-slate-900 transition-all";
+        btnAdmin.className = "flex items-center space-x-2 px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-semibold transition-all shadow-xs bg-white dark:bg-slate-900 text-slate-900 dark:text-white";
+        btnCatalog.className = "flex items-center space-x-2 px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all";
 
         if (isAdminLoggedIn) {
           vCatalog.classList.add('hidden');
@@ -904,10 +1028,10 @@
         const tabBtn = document.getElementById(`admin-tab-${s}`);
         if (s === sec) {
           secEl.classList.remove('hidden');
-          tabBtn.className = "px-4 py-2.5 font-bold text-sm border-b-2 border-brand-600 text-brand-600 flex items-center gap-2 whitespace-nowrap";
+          tabBtn.className = "px-4 py-2.5 font-bold text-sm border-b-2 border-brand-600 dark:border-brand-500 text-brand-600 dark:text-brand-400 flex items-center gap-2 whitespace-nowrap";
         } else {
           secEl.classList.add('hidden');
-          tabBtn.className = "px-4 py-2.5 font-semibold text-sm text-slate-500 border-b-2 border-transparent hover:text-slate-800 flex items-center gap-2 whitespace-nowrap";
+          tabBtn.className = "px-4 py-2.5 font-semibold text-sm text-slate-500 dark:text-slate-400 border-b-2 border-transparent hover:text-slate-800 dark:hover:text-white flex items-center gap-2 whitespace-nowrap";
         }
       });
 
@@ -916,7 +1040,7 @@
       if (sec === 'payments') loadPaymentMethodsAdmin();
     }
 
-    // Login logic
+    // Login Handle
     function handleLogin(e) {
       e.preventDefault();
       const u = document.getElementById('login-user').value.trim();
@@ -928,6 +1052,7 @@
         saveAllState();
         errBox.classList.add('hidden');
         document.getElementById('form-login').reset();
+        showToast('¡Sesión iniciada con éxito!');
         switchTab('admin');
       } else {
         errBox.classList.remove('hidden');
@@ -937,10 +1062,11 @@
     function logoutAdmin() {
       isAdminLoggedIn = false;
       saveAllState();
+      showToast('Sesión cerrada');
       switchTab('catalog');
     }
 
-    // Apply config
+    // Apply store configs to UI
     function applyConfigUI() {
       document.getElementById('nav-store-name').innerText = config.name;
       document.getElementById('nav-slogan').innerText = config.slogan;
@@ -966,7 +1092,7 @@
 
       container.innerHTML = allCats.map(cat => {
         const active = cat === selectedCategory;
-        const activeClass = active ? 'bg-slate-900 text-white shadow-md' : 'bg-white text-slate-600 hover:bg-slate-200 border border-slate-200';
+        const activeClass = active ? 'bg-slate-900 dark:bg-emerald-600 text-white shadow-md' : 'bg-white dark:bg-slate-900 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800';
         return `<button onclick="selectCategory('${cat}')" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition ${activeClass}">${cat}</button>`;
       }).join('');
     }
@@ -977,22 +1103,49 @@
       filterCatalog();
     }
 
-    // Catalog Rendering
+    function clearSearch() {
+      const searchInput = document.getElementById('catalog-search');
+      searchInput.value = '';
+      document.getElementById('btn-clear-search').classList.add('hidden');
+      filterCatalog();
+    }
+
+    // Catalog Rendering with search, filter, and sort
     function renderCatalog() {
       filterCatalog();
     }
 
     function filterCatalog() {
-      const query = document.getElementById('catalog-search').value.toLowerCase().trim();
+      const searchInput = document.getElementById('catalog-search');
+      const query = searchInput.value.toLowerCase().trim();
+      const btnClear = document.getElementById('btn-clear-search');
       const grid = document.getElementById('products-grid');
       const emptyState = document.getElementById('catalog-empty');
+      const sortVal = document.getElementById('catalog-sort').value;
 
-      const filtered = products.filter(p => {
+      if (query.length > 0) {
+        btnClear.classList.remove('hidden');
+      } else {
+        btnClear.classList.add('hidden');
+      }
+
+      let filtered = products.filter(p => {
         if (!p.active) return false;
         const matchCat = selectedCategory === 'Todas' || p.category === selectedCategory;
-        const matchSearch = p.name.toLowerCase().includes(query) || p.desc.toLowerCase().includes(query) || p.category.toLowerCase().includes(query);
+        const matchSearch = p.name.toLowerCase().includes(query) || (p.desc && p.desc.toLowerCase().includes(query)) || p.category.toLowerCase().includes(query);
         return matchCat && matchSearch;
       });
+
+      // Sorting
+      if (sortVal === 'price-low') {
+        filtered.sort((a, b) => a.price - b.price);
+      } else if (sortVal === 'price-high') {
+        filtered.sort((a, b) => b.price - a.price);
+      } else if (sortVal === 'name-asc') {
+        filtered.sort((a, b) => a.name.localeCompare(b.name));
+      } else if (sortVal === 'name-desc') {
+        filtered.sort((a, b) => b.name.localeCompare(a.name));
+      }
 
       if (filtered.length === 0) {
         grid.innerHTML = '';
@@ -1001,32 +1154,59 @@
       }
 
       emptyState.classList.add('hidden');
-      grid.innerHTML = filtered.map(p => `
-        <div class="bg-white rounded-2xl border border-slate-200 shadow-xs hover:shadow-md transition overflow-hidden flex flex-col group cursor-pointer" onclick="openDetailModal('${p.id}')">
-          <div class="relative bg-slate-100 aspect-square overflow-hidden">
-            <img src="${p.img || 'https://via.placeholder.com/300'}" alt="${p.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
-            <span class="absolute top-2 left-2 bg-slate-900/70 backdrop-blur-sm text-white text-[10px] font-bold px-2 py-0.5 rounded-lg">
-              ${p.category}
-            </span>
+
+      if (layoutMode === 'grid') {
+        grid.className = "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 sm:gap-6";
+        grid.innerHTML = filtered.map(p => `
+          <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs hover:shadow-lg transition duration-300 overflow-hidden flex flex-col group cursor-pointer" onclick="openDetailModal('${p.id}')">
+            <div class="relative bg-slate-100 dark:bg-slate-800 aspect-square overflow-hidden">
+              <img src="${p.img || 'https://placehold.co/400x400/10b981/ffffff?text=Sin+Imagen'}" alt="${p.name}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" onerror="this.src='https://placehold.co/400x400/10b981/ffffff?text=Sin+Imagen'">
+              <span class="absolute top-2 left-2 bg-slate-900/70 backdrop-blur-sm text-white text-[10px] font-bold px-2 py-0.5 rounded-lg">
+                ${p.category}
+              </span>
+            </div>
+
+            <div class="p-3 sm:p-4 flex flex-col flex-grow">
+              <h3 class="font-bold text-slate-800 dark:text-white text-sm sm:text-base line-clamp-1 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition">${p.name}</h3>
+              <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mt-1 mb-3">${p.desc || 'Sin descripción'}</p>
+
+              <div class="mt-auto flex items-center justify-between gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+                <span class="font-extrabold text-slate-900 dark:text-white text-sm sm:text-base">${config.currency} ${p.price.toFixed(2)}</span>
+                <button onclick="event.stopPropagation(); addToCart('${p.id}')" class="bg-brand-50 hover:bg-emerald-600 dark:bg-emerald-950/60 hover:dark:bg-emerald-600 text-emerald-700 hover:text-white dark:text-emerald-400 p-2 rounded-xl transition flex items-center justify-center" title="Agregar al Carrito">
+                  <i class="fa-solid fa-cart-plus text-sm"></i>
+                </button>
+              </div>
+            </div>
           </div>
+        `).join('');
+      } else {
+        // List Layout
+        grid.className = "flex flex-col space-y-3";
+        grid.innerHTML = filtered.map(p => `
+          <div class="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-3 sm:p-4 shadow-xs hover:shadow-md transition duration-300 flex items-center justify-between gap-4 cursor-pointer group" onclick="openDetailModal('${p.id}')">
+            <div class="flex items-center space-x-3 sm:space-x-4">
+              <img src="${p.img || 'https://placehold.co/200x200/10b981/ffffff?text=Sin+Imagen'}" alt="${p.name}" class="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-xl bg-slate-100 dark:bg-slate-800" onerror="this.src='https://placehold.co/200x200/10b981/ffffff?text=Sin+Imagen'">
+              <div>
+                <span class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-[10px] font-bold px-2 py-0.5 rounded-md">${p.category}</span>
+                <h3 class="font-bold text-slate-800 dark:text-white text-sm sm:text-base group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition mt-0.5">${p.name}</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-1 hidden sm:block">${p.desc || 'Sin descripción'}</p>
+              </div>
+            </div>
 
-          <div class="p-3 sm:p-4 flex flex-col flex-grow">
-            <h3 class="font-bold text-slate-800 text-sm sm:text-base line-clamp-1 group-hover:text-emerald-600 transition">${p.name}</h3>
-            <p class="text-xs text-slate-500 line-clamp-2 mt-1 mb-3">${p.desc || 'Sin descripción'}</p>
-
-            <div class="mt-auto flex items-center justify-between gap-2 pt-2 border-t border-slate-100">
-              <span class="font-extrabold text-slate-900 text-sm sm:text-base">${config.currency} ${p.price.toFixed(2)}</span>
-              <button onclick="event.stopPropagation(); addToCart('${p.id}')" class="bg-brand-50 hover:bg-emerald-600 hover:text-white text-emerald-700 p-2 rounded-xl transition flex items-center justify-center" title="Agregar al Carrito">
-                <i class="fa-solid fa-cart-plus text-sm"></i>
+            <div class="flex items-center gap-3">
+              <span class="font-extrabold text-slate-900 dark:text-white text-base sm:text-lg whitespace-nowrap">${config.currency} ${p.price.toFixed(2)}</span>
+              <button onclick="event.stopPropagation(); addToCart('${p.id}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-3 py-2 rounded-xl text-xs font-bold transition flex items-center gap-1.5" title="Agregar al Carrito">
+                <i class="fa-solid fa-cart-plus"></i>
+                <span class="hidden sm:inline">Agregar</span>
               </button>
             </div>
           </div>
-        </div>
-      `).join('');
+        `).join('');
+      }
     }
 
 
-    // ================= DESCARGAS Y GUÍAS (VISTA PÚBLICA) =================
+    // ================= DESCARGAS Y GUÍAS =================
     function renderDownloads() {
       const container = document.getElementById('downloads-list');
       if (downloads.length === 0) {
@@ -1035,19 +1215,19 @@
       }
 
       container.innerHTML = downloads.map(d => `
-        <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-xs flex flex-col justify-between space-y-4">
+        <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-xs flex flex-col justify-between space-y-4">
           <div>
             <div class="flex items-center gap-3 mb-2">
-              <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-lg">
+              <div class="w-10 h-10 rounded-xl bg-emerald-50 dark:bg-emerald-950/60 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-lg">
                 <i class="fa-solid fa-file-arrow-down"></i>
               </div>
-              <h3 class="font-bold text-slate-800 text-base leading-tight">${d.title}</h3>
+              <h3 class="font-bold text-slate-800 dark:text-white text-base leading-tight">${d.title}</h3>
             </div>
-            <p class="text-xs text-slate-500 leading-relaxed">${d.desc || 'Sin descripción adicional.'}</p>
+            <p class="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">${d.desc || 'Sin descripción adicional.'}</p>
           </div>
 
-          <div class="flex items-center gap-2 pt-2 border-t border-slate-100">
-            <button onclick="copyToClipboard('${d.url}', this)" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition flex items-center gap-1.5" title="Copiar URL">
+          <div class="flex items-center gap-2 pt-2 border-t border-slate-100 dark:border-slate-800">
+            <button onclick="copyToClipboard('${d.url}', this)" class="px-3 py-2 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold text-xs rounded-xl transition flex items-center gap-1.5" title="Copiar URL">
               <i class="fa-regular fa-copy"></i>
               <span>Copiar URL</span>
             </button>
@@ -1071,15 +1251,15 @@
       container.innerHTML = guides.map(g => {
         const embedUrl = getYouTubeEmbedUrl(g.video);
         return `
-          <div class="bg-white rounded-3xl border border-slate-200 shadow-xs overflow-hidden flex flex-col">
+          <div class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-200 dark:border-slate-800 shadow-xs overflow-hidden flex flex-col">
             <div class="aspect-video bg-black relative">
-              ${embedUrl ? `<iframe src="${embedUrl}" class="w-full h-full" frameborder="0" allowfullscreen></iframe>` : `<div class="flex items-center justify-center h-full text-white text-xs">Video no disponible o enlace no válido</div>`}
+              ${embedUrl ? `<iframe src="${embedUrl}" class="w-full h-full" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>` : `<div class="flex items-center justify-center h-full text-white text-xs">Video no disponible o enlace no válido</div>`}
             </div>
             <div class="p-5 flex flex-col flex-grow">
-              <h3 class="font-bold text-slate-900 text-lg mb-2 flex items-center gap-2">
+              <h3 class="font-bold text-slate-900 dark:text-white text-lg mb-2 flex items-center gap-2">
                 <i class="fa-solid fa-circle-play text-red-500"></i> ${g.title}
               </h3>
-              <p class="text-xs text-slate-600 whitespace-pre-line leading-relaxed bg-slate-50 p-3.5 rounded-2xl border border-slate-100">${g.steps || 'Sigue las instrucciones del video para completar la instalación.'}</p>
+              <p class="text-xs text-slate-600 dark:text-slate-300 whitespace-pre-line leading-relaxed bg-slate-50 dark:bg-slate-800/60 p-3.5 rounded-2xl border border-slate-100 dark:border-slate-800">${g.steps || 'Sigue las instrucciones del video para completar la instalación.'}</p>
             </div>
           </div>
         `;
@@ -1094,18 +1274,29 @@
       } else if (url.includes('youtube.com/watch')) {
         const urlParams = new URLSearchParams(url.split('?')[1]);
         videoId = urlParams.get('v');
+      } else if (url.includes('youtube.com/embed/')) {
+        return url;
       }
       return videoId ? `https://www.youtube.com/embed/${videoId}` : url;
     }
 
     function copyToClipboard(text, btnElement) {
-      navigator.clipboard.writeText(text).then(() => {
+      document.execCommand('copy');
+      const dummy = document.createElement("input");
+      document.body.appendChild(dummy);
+      dummy.value = text;
+      dummy.select();
+      document.execCommand("copy");
+      document.body.removeChild(dummy);
+
+      if (btnElement) {
         const originalText = btnElement.innerHTML;
         btnElement.innerHTML = `<i class="fa-solid fa-check text-emerald-600"></i> <span class="text-emerald-600">¡Copiado!</span>`;
         setTimeout(() => {
           btnElement.innerHTML = originalText;
         }, 2000);
-      });
+      }
+      showToast('Enlace copiado al portapapeles');
     }
 
 
@@ -1117,7 +1308,7 @@
       currentDetailProduct = product;
       currentDetailQty = 1;
 
-      document.getElementById('detail-img').src = product.img || 'https://via.placeholder.com/500';
+      document.getElementById('detail-img').src = product.img || 'https://placehold.co/600x400/10b981/ffffff?text=Sin+Imagen';
       document.getElementById('detail-title').innerText = product.name;
       document.getElementById('detail-category').innerText = product.category;
       document.getElementById('detail-price').innerText = `${config.currency} ${product.price.toFixed(2)}`;
@@ -1159,6 +1350,7 @@
 
       saveAllState();
       updateCartUI();
+      showToast(`¡${product.name} agregado al carrito!`);
     }
 
     function updateCartQty(productId, delta) {
@@ -1182,12 +1374,13 @@
 
       if (paymentMethods.yape?.active) options.push({ id: 'yape', name: 'Yape', icon: 'fa-solid fa-mobile-screen text-purple-600' });
       if (paymentMethods.plin?.active) options.push({ id: 'plin', name: 'Plin', icon: 'fa-solid fa-mobile-screen-button text-sky-600' });
+      if (paymentMethods.bank?.active) options.push({ id: 'bank', name: 'Banco / Transferencia', icon: 'fa-solid fa-building-columns text-indigo-600' });
       if (paymentMethods.usdt?.active) options.push({ id: 'usdt', name: 'USDT / Binance', icon: 'fa-brands fa-bitcoin text-amber-500' });
-      if (paymentMethods.worldcoin?.active) options.push({ id: 'worldcoin', name: 'Worldcoin (WLD)', icon: 'fa-solid fa-earth-americas text-slate-800' });
+      if (paymentMethods.worldcoin?.active) options.push({ id: 'worldcoin', name: 'Worldcoin (WLD)', icon: 'fa-solid fa-globe text-slate-800 dark:text-white' });
 
       container.innerHTML = options.map(opt => {
         const isSelected = selectedPaymentMethod === opt.id;
-        const activeBg = isSelected ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-100';
+        const activeBg = isSelected ? 'bg-emerald-600 text-white border-emerald-600 shadow-sm' : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700';
         return `
           <button onclick="selectPaymentMethod('${opt.id}')" class="p-2.5 rounded-xl border font-bold flex items-center justify-center gap-1.5 transition ${activeBg}">
             <i class="${opt.icon}"></i>
@@ -1214,22 +1407,27 @@
         qrBox.classList.remove('hidden');
         title.innerText = `Pago por Yape (${paymentMethods.yape.name || 'Akitodo'})`;
         detail.innerText = `Número: ${paymentMethods.yape.number || config.phone}`;
-        img.src = paymentMethods.yape.qr || 'https://via.placeholder.com/200?text=QR+Yape+no+configurado';
+        img.src = paymentMethods.yape.qr || 'https://placehold.co/200x200/10b981/ffffff?text=QR+Yape';
       } else if (selectedPaymentMethod === 'plin' && paymentMethods.plin?.active) {
         qrBox.classList.remove('hidden');
         title.innerText = `Pago por Plin (${paymentMethods.plin.name || 'Akitodo'})`;
         detail.innerText = `Número: ${paymentMethods.plin.number || config.phone}`;
-        img.src = paymentMethods.plin.qr || 'https://via.placeholder.com/200?text=QR+Plin+no+configurado';
+        img.src = paymentMethods.plin.qr || 'https://placehold.co/200x200/10b981/ffffff?text=QR+Plin';
+      } else if (selectedPaymentMethod === 'bank' && paymentMethods.bank?.active) {
+        qrBox.classList.remove('hidden');
+        title.innerText = `Transferencia (${paymentMethods.bank.name || 'Banco'})`;
+        detail.innerText = `N° Cuenta: ${paymentMethods.bank.acc || 'No configurado'}`;
+        img.src = 'https://placehold.co/200x200/10b981/ffffff?text=Banco+' + encodeURIComponent(paymentMethods.bank.name || 'BCP');
       } else if (selectedPaymentMethod === 'usdt' && paymentMethods.usdt?.active) {
         qrBox.classList.remove('hidden');
         title.innerText = `Pago con USDT (${paymentMethods.usdt.network || 'TRC20'})`;
         detail.innerText = `Wallet / ID: ${paymentMethods.usdt.wallet || 'No configurado'}`;
-        img.src = paymentMethods.usdt.qr || 'https://via.placeholder.com/200?text=QR+USDT+no+configurado';
+        img.src = paymentMethods.usdt.qr || 'https://placehold.co/200x200/10b981/ffffff?text=QR+USDT';
       } else if (selectedPaymentMethod === 'worldcoin' && paymentMethods.worldcoin?.active) {
         qrBox.classList.remove('hidden');
         title.innerText = `Pago con Worldcoin (${paymentMethods.worldcoin.network || 'World App'})`;
-        detail.innerText = `Wallet / Username: ${paymentMethods.worldcoin.wallet || 'No configurado'}`;
-        img.src = paymentMethods.worldcoin.qr || 'https://via.placeholder.com/200?text=QR+Worldcoin+no+configurado';
+        detail.innerText = `Wallet: ${paymentMethods.worldcoin.wallet || 'No configurado'}`;
+        img.src = paymentMethods.worldcoin.qr || 'https://placehold.co/200x200/10b981/ffffff?text=QR+Worldcoin';
       } else {
         qrBox.classList.add('hidden');
       }
@@ -1257,19 +1455,19 @@
       }
 
       listContainer.innerHTML = cart.map(item => `
-        <div class="flex items-center justify-between bg-slate-50 p-3 rounded-2xl border border-slate-200">
+        <div class="flex items-center justify-between bg-slate-50 dark:bg-slate-800/60 p-3 rounded-2xl border border-slate-200 dark:border-slate-800">
           <div class="flex items-center space-x-3">
-            <img src="${item.img || 'https://via.placeholder.com/80'}" class="w-12 h-12 object-cover rounded-xl bg-white">
+            <img src="${item.img || 'https://placehold.co/100x100/10b981/ffffff?text=Item'}" class="w-12 h-12 object-cover rounded-xl bg-white dark:bg-slate-900" onerror="this.src='https://placehold.co/100x100/10b981/ffffff?text=Item'">
             <div>
-              <h4 class="font-bold text-slate-800 text-xs sm:text-sm leading-tight">${item.name}</h4>
-              <p class="text-xs text-emerald-600 font-bold">${config.currency} ${item.price.toFixed(2)}</p>
+              <h4 class="font-bold text-slate-800 dark:text-white text-xs sm:text-sm leading-tight">${item.name}</h4>
+              <p class="text-xs text-emerald-600 dark:text-emerald-400 font-bold">${config.currency} ${item.price.toFixed(2)}</p>
             </div>
           </div>
 
-          <div class="flex items-center border border-slate-300 rounded-xl overflow-hidden bg-white">
-            <button onclick="updateCartQty('${item.id}', -1)" class="px-2.5 py-1 text-slate-600 hover:bg-slate-100 font-bold text-xs">-</button>
-            <span class="px-2 text-xs font-bold text-slate-800">${item.qty}</span>
-            <button onclick="updateCartQty('${item.id}', 1)" class="px-2.5 py-1 text-slate-600 hover:bg-slate-100 font-bold text-xs">+</button>
+          <div class="flex items-center border border-slate-300 dark:border-slate-700 rounded-xl overflow-hidden bg-white dark:bg-slate-800">
+            <button onclick="updateCartQty('${item.id}', -1)" class="px-2.5 py-1 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 font-bold text-xs">-</button>
+            <span class="px-2 text-xs font-bold text-slate-800 dark:text-white">${item.qty}</span>
+            <button onclick="updateCartQty('${item.id}', 1)" class="px-2.5 py-1 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 font-bold text-xs">+</button>
           </div>
         </div>
       `).join('');
@@ -1287,7 +1485,7 @@
 
     function sendOrderToWhatsApp() {
       if (cart.length === 0) {
-        alert('Agrega al menos un producto al carrito para realizar tu pedido.');
+        showToast('Agrega al menos un producto al carrito');
         return;
       }
 
@@ -1305,11 +1503,12 @@
       let payName = 'A coordinar por WhatsApp';
       if (selectedPaymentMethod === 'yape') payName = `Yape (Número: ${paymentMethods.yape.number})`;
       if (selectedPaymentMethod === 'plin') payName = `Plin (Número: ${paymentMethods.plin.number})`;
+      if (selectedPaymentMethod === 'bank') payName = `Transferencia Bancaria (${paymentMethods.bank.name})`;
       if (selectedPaymentMethod === 'usdt') payName = `USDT (${paymentMethods.usdt.network})`;
       if (selectedPaymentMethod === 'worldcoin') payName = `Worldcoin / WLD (${paymentMethods.worldcoin.network})`;
 
       msg += `*Método de Pago Seleccionado:* ${payName}\n\n`;
-      msg += `¿Me indican los siguientes pasos para confirmar el pago y el envío? ¡Muchas gracias!`;
+      msg += `¿Me indican los siguientes pasos para confirmar el pago y la entrega? ¡Muchas gracias!`;
 
       const cleanPhone = config.phone.replace(/[^0-9]/g, '');
       const url = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
@@ -1330,26 +1529,26 @@
       document.getElementById('stat-total-categories').innerText = categories.length;
 
       tbody.innerHTML = filtered.map(p => `
-        <tr class="hover:bg-slate-50 transition">
+        <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/40 transition">
           <td class="py-3 px-4 flex items-center space-x-3">
-            <img src="${p.img || 'https://via.placeholder.com/50'}" class="w-10 h-10 object-cover rounded-xl bg-slate-100">
+            <img src="${p.img || 'https://placehold.co/100x100/10b981/ffffff?text=Item'}" class="w-10 h-10 object-cover rounded-xl bg-slate-100 dark:bg-slate-800" onerror="this.src='https://placehold.co/100x100/10b981/ffffff?text=Item'">
             <div>
-              <div class="font-bold text-slate-800">${p.name}</div>
+              <div class="font-bold text-slate-800 dark:text-white">${p.name}</div>
               <div class="text-xs text-slate-400 max-w-xs truncate">${p.desc || 'Sin descripción'}</div>
             </div>
           </td>
           <td class="py-3 px-4">
-            <span class="bg-slate-100 text-slate-700 text-xs px-2.5 py-1 rounded-lg font-semibold">${p.category}</span>
+            <span class="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs px-2.5 py-1 rounded-lg font-semibold">${p.category}</span>
           </td>
-          <td class="py-3 px-4 font-bold text-slate-900">${config.currency} ${p.price.toFixed(2)}</td>
+          <td class="py-3 px-4 font-bold text-slate-900 dark:text-white">${config.currency} ${p.price.toFixed(2)}</td>
           <td class="py-3 px-4 text-center">
-            <button onclick="toggleProductStatus('${p.id}')" class="px-2.5 py-1 rounded-full text-xs font-bold transition ${p.active ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'}">
-              ${p.active ? 'Disponible' : 'Oculto'}
+            <button onclick="toggleProductStatus('${p.id}')" class="px-2.5 py-1 rounded-full text-xs font-bold transition ${p.active ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400' : 'bg-rose-100 text-rose-700 dark:bg-rose-950/60 dark:text-rose-400'}">
+              ${p.active ? 'Disponible' : 'Agotado / Oculto'}
             </button>
           </td>
           <td class="py-3 px-4 text-right space-x-1">
-            <button onclick="editProduct('${p.id}')" class="p-2 text-slate-500 hover:text-emerald-600 transition"><i class="fa-solid fa-pen-to-square"></i></button>
-            <button onclick="deleteProduct('${p.id}')" class="p-2 text-slate-500 hover:text-rose-600 transition"><i class="fa-solid fa-trash-can"></i></button>
+            <button onclick="editProduct('${p.id}')" class="p-2 text-slate-500 hover:text-emerald-600 dark:hover:text-emerald-400 transition" title="Editar"><i class="fa-solid fa-pen-to-square"></i></button>
+            <button onclick="deleteProduct('${p.id}')" class="p-2 text-slate-500 hover:text-rose-600 dark:hover:text-rose-400 transition" title="Eliminar"><i class="fa-solid fa-trash-can"></i></button>
           </td>
         </tr>
       `).join('');
@@ -1360,7 +1559,7 @@
       const list = document.getElementById('admin-categories-list');
       list.innerHTML = categories.map((cat, idx) => `
         <li class="p-3.5 flex justify-between items-center text-sm">
-          <span class="font-semibold text-slate-700">${cat}</span>
+          <span class="font-semibold text-slate-700 dark:text-slate-300">${cat}</span>
           <button onclick="deleteCategory(${idx})" class="text-rose-500 hover:text-rose-700 p-1 transition"><i class="fa-solid fa-trash-can"></i></button>
         </li>
       `).join('');
@@ -1377,16 +1576,17 @@
         saveAllState();
         renderCategoriesAdminList();
         renderCategoryPills();
+        showToast('Categoría añadida con éxito');
       }
     }
 
     function deleteCategory(index) {
-      if (confirm(`¿Eliminar la categoría "${categories[index]}"?`)) {
-        categories.splice(index, 1);
-        saveAllState();
-        renderCategoriesAdminList();
-        renderCategoryPills();
-      }
+      const catName = categories[index];
+      categories.splice(index, 1);
+      saveAllState();
+      renderCategoriesAdminList();
+      renderCategoryPills();
+      showToast(`Categoría "${catName}" eliminada`);
     }
 
     // Descargas y Guías Admin
@@ -1395,7 +1595,7 @@
       dlList.innerHTML = downloads.map((d, i) => `
         <li class="py-2.5 flex justify-between items-center">
           <div>
-            <div class="font-bold text-slate-800">${d.title}</div>
+            <div class="font-bold text-slate-800 dark:text-white">${d.title}</div>
             <div class="text-xs text-slate-400 truncate max-w-sm">${d.url}</div>
           </div>
           <button onclick="deleteDownloadResource(${i})" class="text-rose-500 hover:text-rose-700 p-1 transition"><i class="fa-solid fa-trash-can"></i></button>
@@ -1406,7 +1606,7 @@
       gList.innerHTML = guides.map((g, i) => `
         <li class="py-2.5 flex justify-between items-center">
           <div>
-            <div class="font-bold text-slate-800">${g.title}</div>
+            <div class="font-bold text-slate-800 dark:text-white">${g.title}</div>
             <div class="text-xs text-slate-400 truncate max-w-sm">${g.video}</div>
           </div>
           <button onclick="deleteGuideResource(${i})" class="text-rose-500 hover:text-rose-700 p-1 transition"><i class="fa-solid fa-trash-can"></i></button>
@@ -1428,15 +1628,15 @@
       document.getElementById('dl-title').value = '';
       document.getElementById('dl-url').value = '';
       document.getElementById('dl-desc').value = '';
+      showToast('Enlace de descarga agregado');
     }
 
     function deleteDownloadResource(index) {
-      if (confirm('¿Deseas eliminar este recurso de descarga?')) {
-        downloads.splice(index, 1);
-        saveAllState();
-        renderAdminDownloadsAndGuides();
-        renderDownloads();
-      }
+      downloads.splice(index, 1);
+      saveAllState();
+      renderAdminDownloadsAndGuides();
+      renderDownloads();
+      showToast('Recurso eliminado');
     }
 
     function handleAddGuide(e) {
@@ -1453,15 +1653,15 @@
       document.getElementById('guide-title').value = '';
       document.getElementById('guide-video').value = '';
       document.getElementById('guide-steps').value = '';
+      showToast('Guía en video agregada');
     }
 
     function deleteGuideResource(index) {
-      if (confirm('¿Deseas eliminar esta guía en video?')) {
-        guides.splice(index, 1);
-        saveAllState();
-        renderAdminDownloadsAndGuides();
-        renderGuides();
-      }
+      guides.splice(index, 1);
+      saveAllState();
+      renderAdminDownloadsAndGuides();
+      renderGuides();
+      showToast('Guía eliminada');
     }
 
     // Métodos de Pago Admin
@@ -1475,6 +1675,10 @@
       document.getElementById('pay-plin-num').value = paymentMethods.plin?.number || '';
       document.getElementById('pay-plin-name').value = paymentMethods.plin?.name || '';
       document.getElementById('pay-plin-qr').value = paymentMethods.plin?.qr || '';
+
+      document.getElementById('pay-bank-active').checked = paymentMethods.bank?.active || false;
+      document.getElementById('pay-bank-name').value = paymentMethods.bank?.name || '';
+      document.getElementById('pay-bank-acc').value = paymentMethods.bank?.acc || '';
 
       document.getElementById('pay-usdt-active').checked = paymentMethods.usdt?.active || false;
       document.getElementById('pay-usdt-wallet').value = paymentMethods.usdt?.wallet || '';
@@ -1502,6 +1706,11 @@
           name: document.getElementById('pay-plin-name').value.trim(),
           qr: document.getElementById('pay-plin-qr').value.trim()
         },
+        bank: {
+          active: document.getElementById('pay-bank-active').checked,
+          name: document.getElementById('pay-bank-name').value.trim(),
+          acc: document.getElementById('pay-bank-acc').value.trim()
+        },
         usdt: {
           active: document.getElementById('pay-usdt-active').checked,
           wallet: document.getElementById('pay-usdt-wallet').value.trim(),
@@ -1518,7 +1727,7 @@
 
       saveAllState();
       updateCartUI();
-      alert('¡Métodos de Pago y códigos QR actualizados con éxito!');
+      showToast('¡Métodos de pago guardados exitosamente!');
     }
 
     // Modal Crear/Editar Producto
@@ -1569,12 +1778,14 @@
           p.desc = desc;
           p.active = active;
         }
+        showToast('Producto actualizado');
       } else {
         const newProd = {
           id: 'p_' + Date.now(),
           name, price, category, img, desc, active
         };
         products.push(newProd);
+        showToast('Producto creado con éxito');
       }
 
       saveAllState();
@@ -1595,16 +1806,16 @@
         saveAllState();
         renderAdminTable();
         renderCatalog();
+        showToast(`Estado de "${p.name}" actualizado`);
       }
     }
 
     function deleteProduct(id) {
-      if (confirm('¿Seguro de que deseas eliminar este producto?')) {
-        products = products.filter(p => p.id !== id);
-        saveAllState();
-        renderAdminTable();
-        renderCatalog();
-      }
+      products = products.filter(p => p.id !== id);
+      saveAllState();
+      renderAdminTable();
+      renderCatalog();
+      showToast('Producto eliminado');
     }
 
     // Configuración Tienda & Seguridad
@@ -1619,7 +1830,7 @@
       saveAllState();
       applyConfigUI();
       renderCatalog();
-      alert('¡Configuración guardada exitosamente!');
+      showToast('¡Configuración de tienda guardada!');
     }
 
     function saveSecurityCredentials(e) {
@@ -1628,7 +1839,26 @@
       credentials.pass = document.getElementById('sec-pass').value.trim();
 
       saveAllState();
-      alert('¡Credenciales actualizadas correctamente!');
+      showToast('¡Credenciales actualizadas correctamente!');
+    }
+
+    // Toast Notification System
+    function showToast(message) {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = 'bg-slate-900 dark:bg-emerald-600 text-white px-4 py-3 rounded-2xl shadow-xl text-xs sm:text-sm font-bold flex items-center gap-2 transform transition-all duration-300 translate-x-10 opacity-0 pointer-events-auto border border-slate-700/50';
+      toast.innerHTML = `<i class="fa-solid fa-circle-check text-emerald-400 dark:text-white"></i> <span>${message}</span>`;
+      
+      container.appendChild(toast);
+
+      setTimeout(() => {
+        toast.classList.remove('translate-x-10', 'opacity-0');
+      }, 10);
+
+      setTimeout(() => {
+        toast.classList.add('translate-x-10', 'opacity-0');
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
     }
   </script>
 </body>
